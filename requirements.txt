@@ -1,0 +1,14 @@
+langchain==0.0.137
+chromadb
+PyPDF2
+openai
+elevenlabs
+wave
+streamlit
+tiktoken
+nltk
+azure-cognitiveservices-speech
+streamlit-option-menu
+streamlit-lottie
+faiss-cpu
+
