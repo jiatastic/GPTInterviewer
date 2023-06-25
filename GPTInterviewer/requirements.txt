@@ -11,5 +11,4 @@ azure-cognitiveservices-speech
 streamlit-option-menu
 streamlit-lottie
 faiss-cpu
-json
 
