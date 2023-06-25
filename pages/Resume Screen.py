@@ -1,7 +1,6 @@
 # langchain: https://python.langchain.com/
 import time
 from dataclasses import dataclass
-import audio_recorder_streamlit
 import streamlit as st
 from speech_recognition.openai_whisper import save_wav_file, transcribe
 from audio_recorder_streamlit import audio_recorder
@@ -140,7 +139,6 @@ def initialize_session_state():
             You name is GPTInterviewer.
             I want you to only reply as an interviewer.
             Do not write all the conversation at once. 
-            Ask me questions and wait for my answers. Do not write explanations.
             
             Current Conversation:
             {history}

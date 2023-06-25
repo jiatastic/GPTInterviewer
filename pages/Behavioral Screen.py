@@ -40,8 +40,6 @@ st.markdown("""
     """)
 
 ### ————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————
-# define prompt templates
-Interview_Prompt = PromptTemplate(input_variables = ["history", "input"], template = templates.behavioral_template)
 
 @dataclass
 class Message:
@@ -80,7 +78,7 @@ def initialize_session_state():
         temperature = 0.8,)
 
         st.session_state.conversation = ConversationChain(
-            prompt=Interview_Prompt,
+            prompt=PromptTemplate(input_variables = ["history", "input"], template = templates.behavioral_template),
             llm=llm,
             memory = st.session_state.memory,
         )
