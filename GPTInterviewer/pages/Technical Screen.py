@@ -150,10 +150,17 @@ def initialize_session_state():
 # logic
 # sumitted job description
 if jd:
+    progress_text = "Loading..."
+    my_bar = st.progress(0, text=progress_text)
+    for percent_complete in range(100):
+        time.sleep(0.02)
+        my_bar.progress(percent_complete + 1, text=progress_text)
+    
     # initialize session states
     initialize_session_state()
     load_css()
-    st.write(st.session_state.jd_guideline)
+    #st.write(st.session_state.jd_guideline)
+    
     # not reaching the token limit
     if len(st.session_state.jd_history) < 12:
 
