@@ -51,18 +51,6 @@ resume = st.file_uploader("#### Upload your resume", type=["pdf"])
 ### -----------------------------------------------------------------------------------------------------------
 
 ### -----------------------------------------------------------------------------------------------------------
-class ExtendedConversationBufferMemory(ConversationBufferMemory):
-    extra_variables = []
-    @property
-    def memory_variables(self):
-        """Will always return list of memory variables."""
-        return [self.memory_key] + self.extra_variables
-    def load_memory_variables(self, inputs):
-        """Return buffer with history and extra variables"""
-        d = super().load_memory_variables(inputs)
-        d.update({k:inputs.get(k) for k in self.extra_variables})
-        return d
-
 @dataclass
 class Message:
     """Class for keeping track of interview history."""
@@ -185,7 +173,7 @@ if position and resume:
     # intialize session state
     initialize_session_state()
     load_css()
-    st.markdown(st.session_state.guideline)
+    #st.markdown(st.session_state.guideline)
 
     if len(st.session_state.resume_history) < 11:
 
