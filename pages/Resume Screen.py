@@ -48,7 +48,9 @@ st.markdown("""
 position = st.selectbox("#### Select the position you are applying for", ["Data Analyst", "Software Engineer", "Marketing"])
 resume = st.file_uploader("#### Upload your resume", type=["pdf"])
 
-### ——————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————
+### -----------------------------------------------------------------------------------------------------------
+
+### -----------------------------------------------------------------------------------------------------------
 @dataclass
 class Message:
     """Class for keeping track of interview history."""
@@ -126,20 +128,19 @@ def initialize_session_state():
 
         PROMPT = PromptTemplate(
             input_variables=["history", "input"],
-            template= """
-            Let think step by step. 
-            I want you to act as an interviewer strictly following the guideline in the current conversation.
-            You name is GPTInterviewer.
-            I want you to only reply as an interviewer.
+            template= """I want you to act as an interviewer strictly following the guideline in the current conversation.
             
             Ask me questions and wait for my answers. Do not write explanations.
-
+            
             Do ask follow-up questions if you think it's necessary.
-                
             Do not ask the same question.
             Do not repeat the question.
+            Do not ask too many questions at once.
+            
+            You name is GPTInterviewer.
+            I want you to only reply as an interviewer.
             Do not write all the conversation at once. 
-        
+            Ask me questions and wait for my answers. Do not write explanations.
             
             Current Conversation:
             {history}
