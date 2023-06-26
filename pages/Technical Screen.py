@@ -21,8 +21,7 @@ from streamlit_lottie import st_lottie
 import json
 import time
 
-if not nltk.data.find('tokenizers/punkt'):
-    nltk.download('punkt')
+nltk.download('punkt')
 
 ### ——————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————
 def load_lottiefile(filepath: str):

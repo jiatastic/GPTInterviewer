@@ -28,9 +28,8 @@ from prompts.prompt_selector import prompt_sector
 from streamlit_lottie import st_lottie
 import json
 
-### -----------------------------------------------------------------------------------------------------------
-if not nltk.data.find('tokenizers/punkt'):
-    nltk.download('punkt')
+### ——————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————
+nltk.download('punkt')
 
 def load_lottiefile(filepath: str):
     with open(filepath, "r") as f:
@@ -47,9 +46,7 @@ st.markdown("""
 position = st.selectbox("#### Select the position you are applying for", ["Data Analyst", "Software Engineer", "Marketing"])
 resume = st.file_uploader("#### Upload your resume", type=["pdf"])
 
-### -----------------------------------------------------------------------------------------------------------
-
-### -----------------------------------------------------------------------------------------------------------
+### ——————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————
 @dataclass
 class Message:
     """Class for keeping track of interview history."""
@@ -161,16 +158,10 @@ def initialize_session_state():
             memory=st.session_state.resume_memory,
         )
 
-### ——————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————
+### ——————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————
 
 # sumitted job description
 if position and resume:
-
-    progress_text = "Loading..."
-    my_bar = st.progress(0, text=progress_text)
-    for percent_complete in range(100):
-        time.sleep(0.02)
-        my_bar.progress(percent_complete + 1, text=progress_text)
 
     # intialize session state
     initialize_session_state()

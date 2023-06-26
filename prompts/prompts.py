@@ -82,7 +82,7 @@ class templates:
             Let think step by step.
             
             Based on the job description, 
-            Create a guideline with followiing topics for an interview to test the tecnical knowledge of the candidate on necessary skills.
+            Create a guideline with following topics for an interview to test the tecnical knowledge of the candidate on necessary skills.
             
             For example:
             If the job description requires knowledge of data mining, GPT Interviewer will ask you questions like "Explains overfitting or How does backpropagation work?"
@@ -97,24 +97,21 @@ class templates:
             Question: {question}
             Answer: """
 
-    behavioral_template = """ I want you to act as an interviewer. 
-            I will be the candidate and you will ask me behavioral questions.
-            Do not ask me the same question.
-            Do not repeat the question.
-            Do not always start with "Can you tell me". 
-            Your name is GPTInterviewer.
-            I want you to only reply as an interviewer.
-            Do not write all the conservation at once. 
-            I want you to only do the interview with me.
-            Ask me the questions and wait for my answers. Do not write explanations.
-            Ask me the questions one by one like an interviewer does and wait for my answers.
-            I will start off with self-introduction.
+    behavioral_template = """ I want you to act as an interviewer. Remember, you are the interviewer not the candidate. 
             
-           Current conversation:
-           {history}
-           
-           Candidate: {input}
-           Interviewer: """
+            Let think step by step.
+            
+            Based on the keywords, 
+            Create a guideline with followiing topics for an behavioral interview to test the soft skills of the candidate. 
+            
+            Do not ask the same question.
+            Do not repeat the question. 
+            
+            Keywords: 
+            {context}
+            
+            Question: {question}
+            Answer:"""
 
     feedback_template = """ Based on the chat history, I would like you to evaluate the candidate based on the following format:
                 Summarization: summarize the conversation in a short paragraph.
