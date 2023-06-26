@@ -38,8 +38,7 @@ st.markdown("""
 st.markdown("""
     """)
 
-bjd = st.text_area("""#### Please enter the job description here: 
-                    If you don't have one, enter keywords, such as "communication" or "teamwork" instead. """)
+bjd = st.text_area("""Please enter the job description here (If you don't have one, enter keywords, such as "communication" or "teamwork" instead): """)
 
 ### ————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————
 
@@ -166,25 +165,25 @@ if bjd:
 
             try:
                 input = transcribe("temp/audio.wav")
+
+                # save human_answer to history
+                st.session_state.history.append(
+                    Message("human", input)
+                )
+
+                # OpenAI answer and save to history
+                llm_answer = st.session_state.conversation.run(input)
+                # speech synthesis and speak out
+                interviewer_answer = speech_synthesizer(llm_answer)
+                # save audio data
+                stream = AudioDataStream(interviewer_answer)
+                # save audio data to history
+                st.session_state.history.append(
+                    Message("ai", llm_answer)
+                )
+                st.session_state.token_count += cb.total_tokens
             except:
-                st.write("Sorry, I didn't get that. Please try again.")
-
-            # save human_answer to history
-            st.session_state.history.append(
-                Message("human", input)
-            )
-
-            # OpenAI answer and save to history
-            llm_answer = st.session_state.conversation.run(input)
-            # speech synthesis and speak out
-            interviewer_answer = speech_synthesizer(llm_answer)
-            # save audio data
-            stream = AudioDataStream(interviewer_answer)
-            # save audio data to history
-            st.session_state.history.append(
-                Message("ai", llm_answer)
-            )
-            st.session_state.token_count += cb.total_tokens
+                st.markdown("#### Sorry, I didn't get that. Please try again.")
 
     if len(st.session_state.history) < 11:
 
@@ -219,8 +218,9 @@ if bjd:
         Used {st.session_state.token_count} tokens \n
         """)
     else:
-        conclusion = "Thank you for using GPTInterviewer. Please enter you email address to receive the report."
-        conclusion = speech_synthesizer(conclusion)
+
+        if "conclusion" not in st.session_state:
+            st.session_state.conclusion = speech_synthesizer("Thank you for using GPTInterviewer. Your interview evaluation will come out shortly. Please enter your email address to receive the evaluation.")
 
         # submit email address
         with st.form(key='my_form'):

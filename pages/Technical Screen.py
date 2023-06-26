@@ -147,15 +147,10 @@ def initialize_session_state():
         )
 
 ### ——————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————
-# logic
+
 # sumitted job description
 if jd:
-    progress_text = "Loading..."
-    my_bar = st.progress(0, text=progress_text)
-    for percent_complete in range(100):
-        time.sleep(0.02)
-        my_bar.progress(percent_complete + 1, text=progress_text)
-    
+
     # initialize session states
     initialize_session_state()
     load_css()
@@ -182,7 +177,6 @@ if jd:
                     st.session_state.jd_history.append(
                         Message("human", input)
                     )
-
                     # OpenAI answer and save to history
                     llm_answer = st.session_state.jd_screen.run(input)
                     # speech synthesis and speak out
