@@ -29,8 +29,6 @@ def load_lottiefile(filepath: str):
         return json.load(f)
 st_lottie(load_lottiefile("images/hello.json"), speed=1, reverse=False, loop=True, quality="high", height=300)
 
-bjd = st.text_area("#### Please enter the job description here (If you don't have job description: ")
-
 st.markdown("### Instruction: ")
 st.markdown("""
     In this session, the GPT Interviewer will assess your soft skills as they relate to the job description.
@@ -39,6 +37,9 @@ st.markdown("""
     - Start introduce yourself and enjoy！ """)
 st.markdown("""
     """)
+
+bjd = st.text_area("""#### Please enter the job description here: 
+                    If you don't have one, enter keywords, such as "communication" or "teamwork" instead. """)
 
 ### ————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————
 
