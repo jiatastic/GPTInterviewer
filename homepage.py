@@ -43,7 +43,7 @@ with st.sidebar:
 
 st.markdown("<hr>", unsafe_allow_html=True)
 
-st.markdown("<h1 style='text-align: center; color: black;'>Your Career Workshop Anytime from Anywhere</h1>", unsafe_allow_html=True)
+st.markdown("<h1 style='text-align: center;>Your Career Workshop Anytime from Anywhere</h1>", unsafe_allow_html=True)
 st.markdown("<p style='text-align: center; color: grey;'> GPT Interviewer is a generative AI powered tool that provides you with realistic interview experience</p>", unsafe_allow_html=True)
 st.markdown("<p style='text-align: center; color: grey;'> You're no longer practice with a static list of questions.</p>", unsafe_allow_html=True)
 
@@ -71,13 +71,13 @@ st.markdown("#")
 col1, col2, col3 = st.columns(3)
 with col1:
     st_lottie(load_lottiefile("images/brain.json"), speed=1, reverse=False, loop=True, quality="high", height=300)
-    st.markdown("<h3 style='text-align: center; color: black;'>ask questions relevant to your resume and job description</h3>", unsafe_allow_html=True)
+    st.markdown("<h3 style='text-align: center;'>ask questions relevant to your resume and job description</h3>", unsafe_allow_html=True)
 with col2:
     st_lottie(load_lottiefile("images/recording.json"), speed=1, reverse=False, loop=True, quality="high", height=300)
-    st.markdown("<h3 style='text-align: center; color: black;'>voice interaction</h3>", unsafe_allow_html=True)
+    st.markdown("<h3 style='text-align: center;'>voice interaction</h3>", unsafe_allow_html=True)
 with col3:
     st_lottie(load_lottiefile("images/evaluation.json"), speed=1, reverse=False, loop=True, quality="high", height=300)
-    st.markdown("<h3 style='text-align: center; color: black;'>AI evaluation</h3>", unsafe_allow_html=True)
+    st.markdown("<h3 style='text-align: center;'>AI evaluation</h3>", unsafe_allow_html=True)
 
 
 st.markdown("<hr>", unsafe_allow_html=True)
