@@ -230,8 +230,9 @@ if position and resume:
                 You are on {(len(st.session_state.resume_history) / 11) ** 100}% of the wat to the end.""")
     # reaching the token limit
     else:
-        conclusion = "Thank you for using GPTInterviewer. Please enter you email address to receive the report."
-        conclusion = speech_synthesizer(conclusion)
+        if "technical_conclusion" not in st.session_state:
+            st.session_state.technical_conclusion = speech_synthesizer(
+                "Thank you for using GPTInterviewer. Your interview evaluation will come out shortly. Please enter your email address to receive the evaluation.")
 
         with st.form(key='my_form'):
             email = st.text_input("Email")
