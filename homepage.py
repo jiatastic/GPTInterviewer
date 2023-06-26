@@ -43,7 +43,7 @@ with st.sidebar:
 
 st.markdown("<hr>", unsafe_allow_html=True)
 
-st.markdown("<h1 style='text-align: center;>Your Career Workshop Anytime from Anywhere</h1>", unsafe_allow_html=True)
+st.markdown("<h1 style='text-align: center;'>Your Career Workshop Anytime from Anywhere</h1>", unsafe_allow_html=True)
 st.markdown("<p style='text-align: center; color: grey;'> GPT Interviewer is a generative AI powered tool that provides you with realistic interview experience</p>", unsafe_allow_html=True)
 st.markdown("<p style='text-align: center; color: grey;'> You're no longer practice with a static list of questions.</p>", unsafe_allow_html=True)
 
@@ -66,7 +66,7 @@ selected = option_menu(
 st.markdown("#")
 st.markdown("<hr>", unsafe_allow_html=True)
 
-st.markdown("<h1 style='text-align: center; color: black;'>Features</h1>", unsafe_allow_html=True)
+st.markdown("<h1 style='text-align: center;'>Features</h1>", unsafe_allow_html=True)
 st.markdown("#")
 col1, col2, col3 = st.columns(3)
 with col1:
