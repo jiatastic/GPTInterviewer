@@ -3,4 +3,4 @@ ca-certificates
 libasound2
 wget
 libffi-dev
-libssl1.0-dev
+libssl1.0
