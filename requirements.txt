@@ -12,3 +12,4 @@ streamlit-option-menu
 streamlit-lottie
 faiss-cpu
 
+

@@ -127,11 +127,11 @@ def initialize_session_state():
             template= """I want you to act as an interviewer strictly following the guideline in the current conversation.
             
             Ask me questions and wait for my answers. Do not write explanations.
-            
+            Start asking me questions from the beginning of the conversation.
+            Only ask one question at a time. 
             Do ask follow-up questions if you think it's necessary.
             Do not ask the same question.
             Do not repeat the question.
-            Do not ask too many questions at once.
             
             You name is GPTInterviewer.
             I want you to only reply as an interviewer.
@@ -158,6 +158,31 @@ def initialize_session_state():
             memory=st.session_state.resume_memory,
         )
 
+def answer_call_back():
+
+    with get_openai_callback() as cb:
+        # user input
+        human_answer = st.session_state.answer
+        # transcribe audio
+        save_wav_file("temp/audio.wav", human_answer)
+        input = transcribe("temp/audio.wav")
+        # save human input to history
+        st.session_state.resume_history.append(
+            Message("human", input)
+        )
+
+        # GPT Interviewer output and save to history
+        llm_answer = st.session_state.resume_screen.run(input)
+        # speech synthesis and speak out
+        interviewer_answer = speech_synthesizer(llm_answer)
+        # save audio data
+        stream = AudioDataStream(interviewer_answer)
+        # save audio data to history
+        st.session_state.resume_history.append(
+            Message("ai", llm_answer)
+        )
+        st.session_state.token_count += cb.total_tokens
+
 ### ——————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————
 
 # sumitted job description
@@ -166,82 +191,41 @@ if position and resume:
     # intialize session state
     initialize_session_state()
     load_css()
-    st.markdown(st.session_state.guideline)
+    #st.markdown(st.session_state.guideline)
 
-    if len(st.session_state.resume_history) < 11:
+    chat_placeholder = st.container()
+    answer_placeholder = st.container()
+    credit_card_placeholder = st.empty()
 
-        chat_placeholder = st.container()
-        answer_placeholder = st.container()
-        credit_card_placeholder = st.empty()
+    with answer_placeholder:
+        answer = audio_recorder(pause_threshold=2, sample_rate=44100)
+        if answer:
+            st.session_state['answer'] = answer
+            answer_call_back()
 
-        def answer_call_back():
-
-            with get_openai_callback() as cb:
-                # user input
-                human_answer = st.session_state.answer
-                # transcribe audio
-                save_wav_file("temp/audio.wav", human_answer)
-                input = transcribe("temp/audio.wav")
-                # save human input to history
-                st.session_state.resume_history.append(
-                    Message("human", input)
-                )
-
-                # GPT Interviewer output and save to history
-                llm_answer = st.session_state.resume_screen.run(input)
-                # speech synthesis and speak out
-                interviewer_answer = speech_synthesizer(llm_answer)
-                # save audio data
-                stream = AudioDataStream(interviewer_answer)
-                # save audio data to history
-                st.session_state.resume_history.append(
-                    Message("ai", llm_answer)
-                )
-                st.session_state.token_count += cb.total_tokens
-
-        with answer_placeholder:
-            answer = audio_recorder(pause_threshold = 2, sample_rate = 44100)
+    with chat_placeholder:
+        for answer in st.session_state.resume_history:
             if answer:
-                st.session_state['answer'] = answer
-                answer_call_back()
-
-        with chat_placeholder:
-            for answer in st.session_state.resume_history:
-                if answer:
-                    div = f"""<div class="chat-row 
-                                    {'' if answer.origin == 'ai' else 'row-reverse'}">
-                                    <img class="chat-icon" src="static/images/{
-                    'chat.png' if answer.origin == 'ai'
-                    else 'user.png'}"
-                                         width=32 height=32>
-                                    <div class="chat-bubble
-                                    {'ai-bubble' if answer.origin == 'ai' else 'human-bubble'}">
-                                        &#8203;{answer.message}
+                div = f"""<div class="chat-row 
+                                        {'' if answer.origin == 'ai' else 'row-reverse'}">
+                                        <img class="chat-icon" src="static/images/{
+                'chat.png' if answer.origin == 'ai'
+                else 'user.png'}"
+                                             width=32 height=32>
+                                        <div class="chat-bubble
+                                        {'ai-bubble' if answer.origin == 'ai' else 'human-bubble'}">
+                                            &#8203;{answer.message}
+                                        </div>
                                     </div>
-                                </div>
-                                        """
-                    st.markdown(div, unsafe_allow_html=True)
+                                            """
+                st.markdown(div, unsafe_allow_html=True)
 
-                for _ in range(3):
-                    st.markdown("")
+            for _ in range(3):
+                st.markdown("")
 
-        credit_card_placeholder.caption(f"""
-                Used {st.session_state.token_count} tokens \n
-                You are on {(len(st.session_state.resume_history) / 11) ** 100}% of the wat to the end.""")
-    # reaching the token limit
-    else:
-        if "technical_conclusion" not in st.session_state:
-            st.session_state.technical_conclusion = speech_synthesizer(
-                "Thank you for using GPTInterviewer. Your interview evaluation will come out shortly. Please enter your email address to receive the evaluation.")
-
-        with st.form(key='my_form'):
-            email = st.text_input("Email")
-            submit = st.form_submit_button("Submit")
-
-            if submit:
-                # evaluation
-                evaluation = st.session_state.resume_feedback.run("please give evalution regarding the interview")
-                st.markdown(evaluation)
+    credit_card_placeholder.caption(f"""
+                    Used {st.session_state.token_count} tokens \n
+                    You are on {(len(st.session_state.resume_history) / 11) ** 100}% of the wat to the end.""")
 
 else:
     st.write("Please submit your resume and select desired position first.")

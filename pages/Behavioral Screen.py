@@ -4,7 +4,6 @@ from langchain.memory import ConversationBufferMemory
 from dataclasses import dataclass
 # Streamlit - for web application
 import streamlit as st
-from st_audiorec.st_custom_components import st_audiorec
 from speech_recognition.openai_whisper import save_wav_file, transcribe
 from audio_recorder_streamlit import audio_recorder
 from langchain.callbacks import get_openai_callback
@@ -145,6 +144,37 @@ def initialize_session_state():
             memory = st.session_state.memory,
         )
 
+def answer_call_back():
+
+    with get_openai_callback() as cb:
+        # user input
+        human_answer = st.session_state.answer
+        # transcribe audio
+        save_wav_file("temp/audio.wav", human_answer)
+
+        try:
+            input = transcribe("temp/audio.wav")
+
+            # save human_answer to history
+            st.session_state.history.append(
+                Message("human", input)
+            )
+
+            # OpenAI answer and save to history
+            llm_answer = st.session_state.conversation.run(input)
+            # speech synthesis and speak out
+            interviewer_answer = speech_synthesizer(llm_answer)
+            # save audio data
+            stream = AudioDataStream(interviewer_answer)
+            # save audio data to history
+            st.session_state.history.append(
+                Message("ai", llm_answer)
+            )
+            st.session_state.token_count += cb.total_tokens
+        except:
+            st.write("Sorry, I didn't get that. Please try again.")
+### ————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————
+
 if bjd:
 
     # initialize session states
@@ -155,40 +185,21 @@ if bjd:
     answer_placeholder = st.container()
     credit_card_placeholder = st.empty()
 
-    def answer_call_back():
+    with st.form(key = "email"):
+        email = st.text_input("Please enter your email address to access interview report (you may enter it anytime during the interview): ")
+        submit = st.form_submit_button("Submit")
 
-        with get_openai_callback() as cb:
-            # user input
-            human_answer = st.session_state.answer
-            # transcribe audio
-            save_wav_file("temp/audio.wav", human_answer)
+    # if submit email adress, get interview feedback imediately
+    if submit:
+        if submit:
+            evaluation = st.session_state.feedback.run("please give evalution regarding the interview")
+            st.markdown(evaluation)
+            st.stop()
 
-            try:
-                input = transcribe("temp/audio.wav")
-
-                # save human_answer to history
-                st.session_state.history.append(
-                    Message("human", input)
-                )
-
-                # OpenAI answer and save to history
-                llm_answer = st.session_state.conversation.run(input)
-                # speech synthesis and speak out
-                interviewer_answer = speech_synthesizer(llm_answer)
-                # save audio data
-                stream = AudioDataStream(interviewer_answer)
-                # save audio data to history
-                st.session_state.history.append(
-                    Message("ai", llm_answer)
-                )
-                st.session_state.token_count += cb.total_tokens
-            except:
-                st.markdown("#### Sorry, I didn't get that. Please try again.")
-
-    if len(st.session_state.history) < 11:
-
+    # keep interview
+    else:
         with answer_placeholder:
-            answer = audio_recorder(pause_threshold = 2.5, sample_rate = 44100)
+            answer = audio_recorder(pause_threshold=2.5, sample_rate=44100)
             if answer:
                 st.session_state['answer'] = answer
                 answer_call_back()
@@ -215,23 +226,9 @@ if bjd:
                     st.markdown("")
 
         credit_card_placeholder.caption(f"""
-        Used {st.session_state.token_count} tokens \n
+        Progress: {int(len(st.session_state.history) / 12 * 100)} % completed \n
         """)
-    else:
 
-        if "conclusion" not in st.session_state:
-            st.session_state.conclusion = speech_synthesizer("Thank you for using GPTInterviewer. Your interview evaluation will come out shortly. Please enter your email address to receive the evaluation.")
-
-        # submit email address
-        with st.form(key='my_form'):
-            email = st.text_input("Email")
-            submit = st.form_submit_button("Submit")
-
-            if submit:
-                conclusion = None
-                evaluation = st.session_state.feedback.run("please give evalution regarding the interview")
-                st.write(evaluation)
-                st.stop()
 else:
     st.write("Please enter the job description first")
 
