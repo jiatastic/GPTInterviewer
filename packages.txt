@@ -1,6 +1,6 @@
 build-essential
 ca-certificates
+libpthreads
 libasound2
 wget
-libffi-dev
 libssl-dev
