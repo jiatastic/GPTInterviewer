@@ -1,15 +1,2 @@
-<<<<<<< HEAD
+xdg-utils
 
-
-
-
-
-
-=======
-build-essential
-ca-certificates
-libpthreads
-libasound2
-wget
-libssl-dev
->>>>>>> a48f893be4574ee5744a5385c62a775a5fceb54a
