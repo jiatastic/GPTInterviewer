@@ -70,13 +70,13 @@ def load_css():
 
 def initialize_session_state():
 
-    if 'bjd_docsearch' not in st.session_state:
+    if "bjd_docsearch" not in st.session_state:
         st.session_state.bjd_docserch = save_vector(bjd)
 
-    if 'bjd_retriever' not in st.session_state:
+    if "bjd_retriever" not in st.session_state:
         st.session_state.bjd_retriever = st.session_state.bjd_docserch.as_retriever(search_type="similarity")
 
-    if 'bjd_chain_type_kwargs' not in st.session_state:
+    if "bjd_chain_type_kwargs" not in st.session_state:
         Behavioral_Prompt = PromptTemplate(input_variables=["context", "question"],
                                           template=templates.behavioral_template)
         st.session_state.bjd_chain_type_kwargs = {"prompt": Behavioral_Prompt}
@@ -91,7 +91,7 @@ def initialize_session_state():
     if "memory" not in st.session_state:
         st.session_state.memory = ConversationBufferMemory()
 
-    if 'guideline' not in st.session_state:
+    if "guideline" not in st.session_state:
 
         llm = ChatOpenAI(
             model_name="gpt-3.5-turbo",

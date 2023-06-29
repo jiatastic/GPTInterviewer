@@ -217,6 +217,6 @@ if jd:
 
         credit_card_placeholder.caption(f"""
         Used {st.session_state.token_count} tokens \n
-        You are on {int((len(st.session_state.jd_history) / 11 ** 100))}% of the toward to the end.""")
+        Progress: {int((len(st.session_state.jd_history) / 11 ** 100))}% completed.""")
 else:
     st.write("Please enter the job description first.")

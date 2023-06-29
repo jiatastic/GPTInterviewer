@@ -1,2 +1,2 @@
 xdg-utils
-
+w3m
