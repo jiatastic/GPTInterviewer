@@ -9,16 +9,9 @@ from langchain.chat_models import ChatOpenAI
 from langchain.memory import ConversationBufferMemory
 from langchain.chains import RetrievalQA, ConversationChain
 from langchain.prompts.prompt import PromptTemplate
-from langchain.prompts import (
-    SystemMessagePromptTemplate,
-    HumanMessagePromptTemplate,
-    ChatPromptTemplate,
-    MessagesPlaceholder
-)
 from prompts.prompts import templates
 from typing import Literal
-from azure_service.speech_synthesizer import speech_synthesizer
-from azure.cognitiveservices.speech import AudioDataStream
+from aws.synthesize_speech import synthesize_speech
 from langchain.embeddings import OpenAIEmbeddings
 from langchain.vectorstores import FAISS
 from langchain.text_splitter import NLTKTextSplitter
@@ -174,9 +167,7 @@ def answer_call_back():
         # GPT Interviewer output and save to history
         llm_answer = st.session_state.resume_screen.run(input)
         # speech synthesis and speak out
-        interviewer_answer = speech_synthesizer(llm_answer)
-        # save audio data
-        stream = AudioDataStream(interviewer_answer)
+        interviewer_answer = synthesize_speech(llm_answer)
         # save audio data to history
         st.session_state.resume_history.append(
             Message("ai", llm_answer)
@@ -197,35 +188,45 @@ if position and resume:
     answer_placeholder = st.container()
     credit_card_placeholder = st.empty()
 
-    with answer_placeholder:
-        answer = audio_recorder(pause_threshold=2, sample_rate=44100)
-        if answer:
-            st.session_state['answer'] = answer
-            answer_call_back()
+    with st.form(key = "email"):
+        email = st.text_input("Please enter your email address to access interview report (you may enter it anytime during the interview): ")
+        submit = st.form_submit_button("Submit")
 
-    with chat_placeholder:
-        for answer in st.session_state.resume_history:
+    # if submit email adress, get interview feedback imediately
+    if submit:
+        evaluation = st.session_state.feedback.run("please give evalution regarding the interview")
+        st.markdown(evaluation)
+        st.stop()
+    else:
+        with answer_placeholder:
+            answer = audio_recorder(pause_threshold=2, sample_rate=44100)
             if answer:
-                div = f"""<div class="chat-row 
-                                        {'' if answer.origin == 'ai' else 'row-reverse'}">
-                                        <img class="chat-icon" src="static/images/{
-                'chat.png' if answer.origin == 'ai'
-                else 'user.png'}"
-                                             width=32 height=32>
-                                        <div class="chat-bubble
-                                        {'ai-bubble' if answer.origin == 'ai' else 'human-bubble'}">
-                                            &#8203;{answer.message}
+                st.session_state['answer'] = answer
+                answer_call_back()
+
+        with chat_placeholder:
+            for answer in st.session_state.resume_history:
+                if answer:
+                    div = f"""<div class="chat-row 
+                                            {'' if answer.origin == 'ai' else 'row-reverse'}">
+                                            <img class="chat-icon" src="static/images/{
+                    'chat.png' if answer.origin == 'ai'
+                    else 'user.png'}"
+                                                 width=32 height=32>
+                                            <div class="chat-bubble
+                                            {'ai-bubble' if answer.origin == 'ai' else 'human-bubble'}">
+                                                &#8203;{answer.message}
+                                            </div>
                                         </div>
-                                    </div>
-                                            """
-                st.markdown(div, unsafe_allow_html=True)
+                                                """
+                    st.markdown(div, unsafe_allow_html=True)
 
-            for _ in range(3):
-                st.markdown("")
+                for _ in range(3):
+                    st.markdown("")
 
-    credit_card_placeholder.caption(f"""
-                    Used {st.session_state.token_count} tokens \n
-                    You are on {(len(st.session_state.resume_history) / 11) ** 100}% of the wat to the end.""")
+        credit_card_placeholder.caption(f"""
+                        Used {st.session_state.token_count} tokens \n
+                        You are on {int((len(st.session_state.resume_history) / 11) ** 100)}% of the wat to the end.""")
 
 else:
     st.write("Please submit your resume and select desired position first.")

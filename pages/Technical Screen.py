@@ -11,8 +11,7 @@ from langchain.chains import RetrievalQA, ConversationChain
 from prompts.prompts import templates
 from langchain.prompts.prompt import PromptTemplate
 from typing import Literal
-from azure_service.speech_synthesizer import speech_synthesizer
-from azure.cognitiveservices.speech import AudioDataStream
+from aws.synthesize_speech import synthesize_speech
 from langchain.embeddings import OpenAIEmbeddings
 from langchain.vectorstores import FAISS
 from langchain.text_splitter import NLTKTextSplitter
@@ -35,7 +34,7 @@ st.markdown("""
     - Press the microphone to start answering.
     - Each Interview will take 10 to 15 mins. 
     - Start introduce yourself and enjoy！ """)
-jd = st.text_area("#### Please enter the job description here: ")
+jd = st.text_area("Please enter the job description here (If you don't have one, enter keywords, such as PostgreSQL or Python instead): ")
 
 with st.sidebar:
     st.markdown("### What's next?")
@@ -107,20 +106,22 @@ def initialize_session_state():
         PROMPT = PromptTemplate(
             input_variables=["history", "input"],
             template="""I want you to act as an interviewer strictly following the guideline in the current conversation.
-                    Do not ask the same question.
-                    Do not repeat the question.
-                    Do ask follow-up questions if necessary. 
-                    You name is GPTInterviewer.
-                    I want you to only reply as an interviewer.
-                    Do not write all the conversation at once. 
-                    I want you to only reply as an interviewer.
-                    Ask me questions and wait for my answers. Do not write explanations.
+                            
+                            Ask me questions and wait for my answers. Do not write explanations.
+                            Ask question like a real person, only one question at a time.
+                            Do not ask the same question.
+                            Do not repeat the question.
+                            Do ask follow-up questions if necessary. 
+                            You name is GPTInterviewer.
+                            I want you to only reply as an interviewer.
+                            Do not write all the conversation at once.
+                            If there is an error, point it out.
 
-                    Current Conversation:
-                    {history}
+                            Current Conversation:
+                            {history}
 
-                    Candidate: {input}
-                    AI: """)
+                            Candidate: {input}
+                            AI: """)
 
         st.session_state.jd_screen = ConversationChain(prompt=PROMPT, llm=llm,
                                                            memory=st.session_state.jd_memory)
@@ -153,16 +154,15 @@ def answer_call_back():
             # OpenAI answer and save to history
             llm_answer = st.session_state.jd_screen.run(input)
             # speech synthesis and speak out
-            interviewer_answer = speech_synthesizer(llm_answer)
-            # save audio data
-            stream = AudioDataStream(interviewer_answer)
+            interviewer_answer = synthesize_speech(llm_answer)
+
             # save audio data to history
             st.session_state.jd_history.append(
                 Message("ai", llm_answer)
             )
             st.session_state.token_count += cb.total_tokens
         except:
-            st.write("Sorry, I didn't get that. Please try again.")
+            st.session_state.jd_history.append(Message("ai", "Sorry, I didn't get that. Please try again."))
 
 ### ——————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————
 
@@ -173,14 +173,21 @@ if jd:
     initialize_session_state()
     load_css()
     #st.write(st.session_state.jd_guideline)
-    
-    # not reaching the length
-    if len(st.session_state.jd_history) < 12:
 
-        chat_placeholder = st.container()
-        answer_placeholder = st.container()
-        credit_card_placeholder = st.empty()
+    chat_placeholder = st.container()
+    answer_placeholder = st.container()
+    credit_card_placeholder = st.empty()
 
+    with st.form(key = "email"):
+        email = st.text_input("Please enter your email address to access interview report (you may enter it anytime during the interview): ")
+        submit = st.form_submit_button("Submit")
+
+    # if submit email adress, get interview feedback imediately
+    if submit:
+        evaluation = st.session_state.feedback.run("please give evalution regarding the interview")
+        st.markdown(evaluation)
+        st.stop()
+    else:
         with answer_placeholder:
             answer = audio_recorder(pause_threshold = 2.5, sample_rate = 44100)
             if answer:
@@ -210,21 +217,6 @@ if jd:
 
         credit_card_placeholder.caption(f"""
         Used {st.session_state.token_count} tokens \n
-        You are on {(len(st.session_state.jd_history) / 11 ** 100)}% of the wat to the end.""")
-
-    else:
-
-        if "technical_conclusion" not in st.session_state:
-            st.session_state.technical_conclusion = speech_synthesizer(
-            "Thank you for using GPTInterviewer. Your interview evaluation will come out shortly. Please enter your email address to receive the evaluation.")
-
-        with st.form(key='my_form'):
-            email = st.text_input("Email")
-            submit = st.form_submit_button("Submit")
-
-            if submit:
-                # evaluation
-                evaluation = st.session_state.jd_feedback.run("please give evalution regarding the interview")
-                st.write(evaluation)
+        You are on {int((len(st.session_state.jd_history) / 11 ** 100))}% of the toward to the end.""")
 else:
     st.write("Please enter the job description first.")

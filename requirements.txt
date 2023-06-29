@@ -1,15 +1,15 @@
 langchain
 PyPDF2
 openai
-elevenlabs
 wave
 streamlit
 tiktoken
 nltk
-azure-cognitiveservices-speech
+#azure-cognitiveservices-speech
 audio_recorder_streamlit
 streamlit-option-menu
 streamlit-lottie
 faiss-cpu
+boto3
 
 

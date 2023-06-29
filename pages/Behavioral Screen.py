@@ -12,8 +12,7 @@ from langchain.chains import ConversationChain, RetrievalQA
 from prompts.prompts import templates
 from langchain.prompts.prompt import PromptTemplate
 from typing import Literal
-from azure_service.speech_synthesizer import speech_synthesizer
-from azure.cognitiveservices.speech import AudioDataStream
+from aws.synthesize_speech import synthesize_speech
 from streamlit_lottie import st_lottie
 import json
 import nltk
@@ -89,7 +88,7 @@ def initialize_session_state():
     if "token_count" not in st.session_state:
         st.session_state.token_count = 0
 
-    if 'memory' not in st.session_state:
+    if "memory" not in st.session_state:
         st.session_state.memory = ConversationBufferMemory()
 
     if 'guideline' not in st.session_state:
@@ -119,8 +118,7 @@ def initialize_session_state():
                             Do ask follow-up questions if necessary. 
                             You name is GPTInterviewer.
                             I want you to only reply as an interviewer.
-                            Do not write all the conversation at once. 
-                            I want you to only reply as an interviewer.
+                            Do not write all the conversation at once.
                             Ask me questions and wait for my answers. Do not write explanations.
 
                             Current Conversation:
@@ -154,25 +152,21 @@ def answer_call_back():
 
         try:
             input = transcribe("temp/audio.wav")
-
             # save human_answer to history
             st.session_state.history.append(
                 Message("human", input)
             )
-
             # OpenAI answer and save to history
             llm_answer = st.session_state.conversation.run(input)
             # speech synthesis and speak out
-            interviewer_answer = speech_synthesizer(llm_answer)
-            # save audio data
-            stream = AudioDataStream(interviewer_answer)
+            interviewer_answer = synthesize_speech(llm_answer)
             # save audio data to history
             st.session_state.history.append(
                 Message("ai", llm_answer)
             )
             st.session_state.token_count += cb.total_tokens
         except:
-            st.write("Sorry, I didn't get that. Please try again.")
+            st.session_state.history.append(Message("ai", "Sorry, I didn't get that. Please try again."))
 ### ————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————
 
 if bjd:
