@@ -215,7 +215,7 @@ if bjd:
 
                 if output_path:
                     st.session_state.audio_stream = output_path
-                    stream_callback
+                    stream_callback()
 
         with chat_placeholder:
 
