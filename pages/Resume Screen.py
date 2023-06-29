@@ -22,7 +22,7 @@ from streamlit_lottie import st_lottie
 import json
 
 ### ——————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————
-nltk.download('punkt')
+#nltk.download('punkt')
 
 def load_lottiefile(filepath: str):
     with open(filepath, "r") as f:
@@ -120,7 +120,6 @@ def initialize_session_state():
             template= """I want you to act as an interviewer strictly following the guideline in the current conversation.
             
             Ask me questions and wait for my answers. Do not write explanations.
-            Start asking me questions from the beginning of the conversation.
             Only ask one question at a time. 
             Do ask follow-up questions if you think it's necessary.
             Do not ask the same question.
@@ -129,6 +128,7 @@ def initialize_session_state():
             You name is GPTInterviewer.
             I want you to only reply as an interviewer.
             Do not write all the conversation at once. 
+            Candiate has no assess to the guideline.
             
             Current Conversation:
             {history}

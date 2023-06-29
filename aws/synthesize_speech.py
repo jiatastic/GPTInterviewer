@@ -51,3 +51,4 @@ def synthesize_speech(text):
         opener = "open" if sys.platform == "darwin" else "xdg-open"
         subprocess.call([opener, output])
 
+        return output

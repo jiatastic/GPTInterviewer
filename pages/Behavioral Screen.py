@@ -19,6 +19,7 @@ import nltk
 from langchain.text_splitter import NLTKTextSplitter
 from langchain.embeddings import OpenAIEmbeddings
 from langchain.vectorstores import FAISS
+import base64
 
 nltk.download("punkt")
 ### ————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————
@@ -46,21 +47,27 @@ class Message:
     origin: Literal["human", "ai"]
     message: str
 
+def autoplay_audio(file_path: str):
+    with open(file_path, "rb") as f:
+        data = f.read()
+        b64 = base64.b64encode(data).decode()
+        md = f"""
+            <audio controls autoplay="true">
+            <source src="data:audio/mp3;base64,{b64}" type="audio/mp3">
+            </audio>
+            """
+        st.markdown(
+            md,
+            unsafe_allow_html=True,
+        )
+
 def save_vector(text):
 
     text_splitter = NLTKTextSplitter()
     texts = text_splitter.split_text(text)
-
     # Create emebeddings
     embeddings = OpenAIEmbeddings()
-
     docsearch = FAISS.from_texts(texts, embeddings)
-
-    # Retrieve embeedings from vector database - Chromadb
-    #vectordb = Chroma.from_texts(texts=texts, embedding=embeddings, persist_directory= 'db')
-    #vectordb.persist()
-    #vectordb = Chroma(persist_directory='db', embedding_function=embeddings)
-
     return docsearch
 
 def load_css():
@@ -80,6 +87,7 @@ def initialize_session_state():
         Behavioral_Prompt = PromptTemplate(input_variables=["context", "question"],
                                           template=templates.behavioral_template)
         st.session_state.bjd_chain_type_kwargs = {"prompt": Behavioral_Prompt}
+
     # interview history
     if "history" not in st.session_state:
         st.session_state.history = []
@@ -95,7 +103,7 @@ def initialize_session_state():
 
         llm = ChatOpenAI(
             model_name="gpt-3.5-turbo",
-            temperature=0.6, )
+            temperature=0.8, )
 
         st.session_state.guideline = RetrievalQA.from_chain_type(
             llm=llm,
@@ -113,10 +121,12 @@ def initialize_session_state():
         PROMPT = PromptTemplate(
             input_variables=["history", "input"],
             template="""I want you to act as an interviewer strictly following the guideline in the current conversation.
+                            
+                            Only one question at a time.
                             Do not ask the same question.
-                            Do not repeat the question.
+                            Do not repeat the question, even if the candidate did not answer it.
                             Do ask follow-up questions if necessary. 
-                            You name is GPTInterviewer.
+                            You name is GPTInterviewer, but do not include "GPTInterviewer: " in your response. 
                             I want you to only reply as an interviewer.
                             Do not write all the conversation at once.
                             Ask me questions and wait for my answers. Do not write explanations.
@@ -143,13 +153,11 @@ def initialize_session_state():
         )
 
 def answer_call_back():
-
     with get_openai_callback() as cb:
         # user input
         human_answer = st.session_state.answer
         # transcribe audio
         save_wav_file("temp/audio.wav", human_answer)
-
         try:
             input = transcribe("temp/audio.wav")
             # save human_answer to history
@@ -159,7 +167,7 @@ def answer_call_back():
             # OpenAI answer and save to history
             llm_answer = st.session_state.conversation.run(input)
             # speech synthesis and speak out
-            interviewer_answer = synthesize_speech(llm_answer)
+            output_path = synthesize_speech(llm_answer)
             # save audio data to history
             st.session_state.history.append(
                 Message("ai", llm_answer)
@@ -167,6 +175,13 @@ def answer_call_back():
             st.session_state.token_count += cb.total_tokens
         except:
             st.session_state.history.append(Message("ai", "Sorry, I didn't get that. Please try again."))
+
+        return output_path
+
+def stream_callback():
+    aduio_path = st.session_state.audio_stream
+    autoplay_audio(aduio_path)
+
 ### ————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————
 
 if bjd:
@@ -196,7 +211,11 @@ if bjd:
             answer = audio_recorder(pause_threshold=2.5, sample_rate=44100)
             if answer:
                 st.session_state['answer'] = answer
-                answer_call_back()
+                output_path = answer_call_back()
+
+                if output_path:
+                    st.session_state.audio_stream = output_path
+                    stream_callback
 
         with chat_placeholder:
 
@@ -220,7 +239,7 @@ if bjd:
                     st.markdown("")
 
         credit_card_placeholder.caption(f"""
-        Progress: {int(len(st.session_state.history) / 12 * 100)} % completed \n
+        Progress: {int(len(st.session_state.history) / 18 * 100)} % completed \n
         """)
 
 else:
