@@ -160,28 +160,31 @@ def answer_call_back():
         human_answer = st.session_state.answer
         # transcribe audio
         save_wav_file("temp/audio.wav", human_answer)
-        input = transcribe("temp/audio.wav")
-        # save human input to history
-        st.session_state.resume_history.append(
-            Message("human", input)
-        )
+        try:
+            input = transcribe("temp/audio.wav")
+            # save human input to history
+            st.session_state.resume_history.append(
+                Message("human", input)
+            )
 
-        # GPT Interviewer output and save to history
-        llm_answer = st.session_state.resume_screen.run(input)
-        # speech synthesis and speak out
-        audio_file_path = synthesize_speech(llm_answer)
+            # GPT Interviewer output and save to history
+            llm_answer = st.session_state.resume_screen.run(input)
+            # speech synthesis and speak out
+            audio_file_path = synthesize_speech(llm_answer)
 
-        st.session_state.audio_file_path = audio_file_path
-        # 创建自动播放的音频部件
-        audio_widget = Audio(audio_file_path, autoplay=True)
+            st.session_state.audio_file_path = audio_file_path
+            # 创建自动播放的音频部件
+            audio_widget = Audio(audio_file_path, autoplay=True)
 
-        # save audio data to history
-        st.session_state.resume_history.append(
-            Message("ai", llm_answer)
-        )
-        st.session_state.token_count += cb.total_tokens
+            # save audio data to history
+            st.session_state.resume_history.append(
+                Message("ai", llm_answer)
+            )
+            st.session_state.token_count += cb.total_tokens
 
-        return audio_widget
+            return audio_widget
+        except:
+            st.session_state.resume_history.append(Message("ai", "Sorry, I didn't get that. Please try again."))
 
 ### ——————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————
 

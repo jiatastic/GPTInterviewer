@@ -178,10 +178,12 @@ def answer_call_back():
                 Message("ai", llm_answer)
             )
             st.session_state.token_count += cb.total_tokens
+        
+            return audio_widget
+
         except:
             st.session_state.history.append(Message("ai", "Sorry, I didn't get that. Please try again."))
 
-        return audio_widget
 
 ### ————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————
 
