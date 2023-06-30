@@ -20,7 +20,7 @@ from PyPDF2 import PdfReader
 from prompts.prompt_selector import prompt_sector
 from streamlit_lottie import st_lottie
 import json
-from IPython.display import Audio, Javascript, display
+from IPython.display import Audio
 
 ### ——————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————
 #nltk.download('punkt')
