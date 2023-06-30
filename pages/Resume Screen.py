@@ -212,6 +212,8 @@ if position and resume:
             if answer:
                 st.session_state['answer'] = answer
                 audio_widget = answer_call_back()
+            else:
+                st.write("Please speak into the microphone to answer the question.")
 
         with chat_placeholder:
             for answer in st.session_state.resume_history:

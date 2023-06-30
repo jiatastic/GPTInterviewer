@@ -5,12 +5,11 @@ from langchain.text_splitter import NLTKTextSplitter
 from langchain.chains import RetrievalQA
 from langchain.vectorstores import Chroma
 import streamlit as st
-class phonescreen:
 
+class phonescreen:
     def __init__(self, pdf_file, retriever = None):
         self.pdf_file = pdf_file
         self.retriever = None
-
     def Chat_OpenAI(self, query: str, llm: langchain.chat_models.base.BaseChatModel, chain_type_kwargs: dict, retriever, memory):
 
             # Conversational Retrieval chain

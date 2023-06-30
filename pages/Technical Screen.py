@@ -194,6 +194,7 @@ if jd:
         evaluation = st.session_state.feedback.run("please give evalution regarding the interview")
         st.markdown(evaluation)
         st.stop()
+
     else:
         with answer_placeholder:
             answer = audio_recorder(pause_threshold = 2.5, sample_rate = 44100)
@@ -201,7 +202,7 @@ if jd:
                 st.session_state['answer'] = answer
                 audio_widget = answer_call_back()
             else:
-                st.write("Your interview history will be displaced here")
+                st.write("Please speak into the microphone to answer the question.")
 
         with chat_placeholder:
             for answer in st.session_state.jd_history:
