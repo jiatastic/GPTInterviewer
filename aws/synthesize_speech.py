@@ -43,12 +43,13 @@ def synthesize_speech(text):
         print("Could not stream audio")
         sys.exit(-1)
 
+    '''
     # Play the audio using the platform's default player
     if sys.platform == "win32":
         os.startfile(output)
     else:
         # The following works on macOS and Linux. (Darwin = mac, xdg-open = linux).
         opener = "open" if sys.platform == "darwin" else "xdg-open"
-        subprocess.call([opener, output])
+        subprocess.call([opener, output])'''
 
-        return output
+    return output

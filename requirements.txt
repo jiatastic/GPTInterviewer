@@ -11,5 +11,7 @@ streamlit-option-menu
 streamlit-lottie
 faiss-cpu
 boto3
+Ipython
+
 
 

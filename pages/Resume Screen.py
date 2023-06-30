@@ -20,6 +20,7 @@ from PyPDF2 import PdfReader
 from prompts.prompt_selector import prompt_sector
 from streamlit_lottie import st_lottie
 import json
+from IPython.display import Audio, Javascript, display
 
 ### ——————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————
 #nltk.download('punkt')
@@ -119,15 +120,16 @@ def initialize_session_state():
             input_variables=["history", "input"],
             template= """I want you to act as an interviewer strictly following the guideline in the current conversation.
             
-            Ask me questions and wait for my answers. Do not write explanations.
+            Ask me questions and wait for my answers like a human. Do not write explanations.
+            Candidate has no assess to the guideline.
             Only ask one question at a time. 
             Do ask follow-up questions if you think it's necessary.
             Do not ask the same question.
             Do not repeat the question.
-            
+            Candidate has no assess to the guideline.
             You name is GPTInterviewer.
             I want you to only reply as an interviewer.
-            Do not write all the conversation at once. 
+            Do not write all the conversation at once.
             Candiate has no assess to the guideline.
             
             Current Conversation:
@@ -167,12 +169,19 @@ def answer_call_back():
         # GPT Interviewer output and save to history
         llm_answer = st.session_state.resume_screen.run(input)
         # speech synthesis and speak out
-        interviewer_answer = synthesize_speech(llm_answer)
+        audio_file_path = synthesize_speech(llm_answer)
+
+        st.session_state.audio_file_path = audio_file_path
+        # 创建自动播放的音频部件
+        audio_widget = Audio(audio_file_path, autoplay=True)
+
         # save audio data to history
         st.session_state.resume_history.append(
             Message("ai", llm_answer)
         )
         st.session_state.token_count += cb.total_tokens
+
+        return audio_widget
 
 ### ——————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————
 
@@ -202,24 +211,31 @@ if position and resume:
             answer = audio_recorder(pause_threshold=2, sample_rate=44100)
             if answer:
                 st.session_state['answer'] = answer
-                answer_call_back()
+                audio_widget = answer_call_back()
 
         with chat_placeholder:
             for answer in st.session_state.resume_history:
                 if answer:
-                    div = f"""<div class="chat-row 
-                                            {'' if answer.origin == 'ai' else 'row-reverse'}">
-                                            <img class="chat-icon" src="static/images/{
-                    'chat.png' if answer.origin == 'ai'
-                    else 'user.png'}"
-                                                 width=32 height=32>
-                                            <div class="chat-bubble
-                                            {'ai-bubble' if answer.origin == 'ai' else 'human-bubble'}">
-                                                &#8203;{answer.message}
-                                            </div>
+                    if answer.origin == 'ai':
+                        div = f"""<div class="chat-row">
+                                        <img class="chat-icon" src="static/images/chat.png" width=32 height=32>
+                                        <div class="chat-bubble ai-bubble">
+                                            &#8203;{answer.message}
                                         </div>
-                                                """
-                    st.markdown(div, unsafe_allow_html=True)
+                                    </div>
+                                    """
+                        st.markdown(div, unsafe_allow_html=True)
+                        st.write(audio_widget)
+
+                    else:
+                        div = f"""<div class="chat-row row-reverse">
+                                        <img class="chat-icon" src="static/images/user.png" width=32 height=32>
+                                        <div class="chat-bubble human-bubble">
+                                            &#8203;{answer.message}
+                                        </div>
+                                    </div>
+                                    """
+                        st.markdown(div, unsafe_allow_html=True)
 
                 for _ in range(3):
                     st.markdown("")
