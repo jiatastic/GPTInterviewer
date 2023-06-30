@@ -242,7 +242,7 @@ if position and resume:
 
         credit_card_placeholder.caption(f"""
                         Used {st.session_state.token_count} tokens \n
-                        Progress: {int((len(st.session_state.resume_history) / 11) ** 100)}% completed.""")
+                        Progress: {int(len(st.session_state.resume_history) / 30 * 100)}% completed.""")
 
 else:
     st.write("Please submit your resume and select desired position first.")

@@ -20,6 +20,7 @@ from langchain.text_splitter import NLTKTextSplitter
 from langchain.embeddings import OpenAIEmbeddings
 from langchain.vectorstores import FAISS
 import base64
+from IPython.display import Audio
 
 nltk.download("punkt")
 ### ————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————
@@ -40,7 +41,6 @@ st.markdown("""
 bjd = st.text_area("""Please enter the job description here (If you don't have one, enter keywords, such as "communication" or "teamwork" instead): """)
 
 ### ————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————
-
 @dataclass
 class Message:
     """Class for keeping track of interview history."""
@@ -48,18 +48,20 @@ class Message:
     message: str
 
 def autoplay_audio(file_path: str):
-    with open(file_path, "rb") as f:
-        data = f.read()
-        b64 = base64.b64encode(data).decode()
-        md = f"""
-            <audio controls autoplay="true">
-            <source src="data:audio/mp3;base64,{b64}" type="audio/mp3">
-            </audio>
-            """
-        st.markdown(
-            md,
-            unsafe_allow_html=True,
-        )
+    def update_audio():
+        global global_audio_md
+        with open(file_path, "rb") as f:
+            data = f.read()
+            b64 = base64.b64encode(data).decode()
+            global_audio_md = f"""
+                <audio controls autoplay="true">
+                <source src="data:audio/mp3;base64,{b64}" type="audio/mp3">
+                </audio>
+                """
+    def update_markdown(audio_md):
+        st.markdown(audio_md, unsafe_allow_html=True)
+    update_audio()
+    update_markdown(global_audio_md)
 
 def save_vector(text):
 
@@ -167,7 +169,9 @@ def answer_call_back():
             # OpenAI answer and save to history
             llm_answer = st.session_state.conversation.run(input)
             # speech synthesis and speak out
-            output_path = synthesize_speech(llm_answer)
+            audio_file_path = synthesize_speech(llm_answer)
+            # 创建自动播放的音频部件
+            audio_widget = Audio(audio_file_path, autoplay=True)
             # save audio data to history
             st.session_state.history.append(
                 Message("ai", llm_answer)
@@ -176,11 +180,7 @@ def answer_call_back():
         except:
             st.session_state.history.append(Message("ai", "Sorry, I didn't get that. Please try again."))
 
-        return output_path
-
-def stream_callback():
-    aduio_path = st.session_state.audio_stream
-    autoplay_audio(aduio_path)
+        return audio_widget
 
 ### ————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————
 
@@ -195,7 +195,7 @@ if bjd:
     credit_card_placeholder = st.empty()
 
     with st.form(key = "email"):
-        email = st.text_input("Please enter your email address to access interview report (you may enter it anytime during the interview): ")
+        email = st.text_input("Please enter your email address to access inte rview report (you may enter it anytime during the interview): ")
         submit = st.form_submit_button("Submit")
 
     # if submit email adress, get interview feedback imediately
@@ -211,35 +211,37 @@ if bjd:
             answer = audio_recorder(pause_threshold=2.5, sample_rate=44100)
             if answer:
                 st.session_state['answer'] = answer
-                output_path = answer_call_back()
+                audio_widget = answer_call_back()
 
-                if output_path:
-                    st.session_state.audio_stream = output_path
-                    stream_callback()
 
         with chat_placeholder:
-
             for answer in st.session_state.history:
                 if answer:
-                    div = f"""<div class="chat-row 
-                                    {'' if answer.origin == 'ai' else 'row-reverse'}">
-                                    <img class="chat-icon" src="static/{
-                    'chat.png' if answer.origin == 'ai'
-                    else 'user.png'}"
-                                         width=32 height=32>
-                                    <div class="chat-bubble
-                                    {'ai-bubble' if answer.origin == 'ai' else 'human-bubble'}">
-                                        &#8203;{answer.message}
+                    if answer.origin == 'ai':
+                        div = f"""<div class="chat-row">
+                                        <img class="chat-icon" src="static/images/chat.png" width=32 height=32>
+                                        <div class="chat-bubble ai-bubble">
+                                            &#8203;{answer.message}
+                                        </div>
                                     </div>
-                                </div>
-                                        """
-                    st.markdown(div, unsafe_allow_html=True)
+                                    """
+                        st.markdown(div, unsafe_allow_html=True)
+                        st.write(audio_widget)
 
+                    else:
+                        div = f"""<div class="chat-row row-reverse">
+                                        <img class="chat-icon" src="static/images/user.png" width=32 height=32>
+                                        <div class="chat-bubble human-bubble">
+                                            &#8203;{answer.message}
+                                        </div>
+                                    </div>
+                                    """
+                        st.markdown(div, unsafe_allow_html=True)
                 for _ in range(3):
                     st.markdown("")
 
         credit_card_placeholder.caption(f"""
-        Progress: {int(len(st.session_state.history) / 18 * 100)} % completed \n
+        Progress: {int(len(st.session_state.history) / 30 * 100)} % completed \n
         """)
 
 else:

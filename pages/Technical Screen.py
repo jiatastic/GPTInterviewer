@@ -19,7 +19,7 @@ import nltk
 from streamlit_lottie import st_lottie
 import json
 import time
-
+from IPython.display import Audio
 nltk.download('punkt')
 
 ### ——————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————
@@ -153,16 +153,23 @@ def answer_call_back():
             )
             # OpenAI answer and save to history
             llm_answer = st.session_state.jd_screen.run(input)
-            # speech synthesis and speak out
-            interviewer_answer = synthesize_speech(llm_answer)
+            # speech synthesis
+            audio_file_path = synthesize_speech(llm_answer)
+
+            st.session_state.audio_file_path = audio_file_path
+            # 创建自动播放的音频部件
+            audio_widget = Audio(audio_file_path, autoplay=True)
 
             # save audio data to history
             st.session_state.jd_history.append(
                 Message("ai", llm_answer)
             )
             st.session_state.token_count += cb.total_tokens
+
+            return audio_widget
         except:
             st.session_state.jd_history.append(Message("ai", "Sorry, I didn't get that. Please try again."))
+
 
 ### ——————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————
 
@@ -192,31 +199,39 @@ if jd:
             answer = audio_recorder(pause_threshold = 2.5, sample_rate = 44100)
             if answer:
                 st.session_state['answer'] = answer
-                answer_call_back()
+                audio_widget = answer_call_back()
             else:
                 st.write("Your interview history will be displaced here")
 
         with chat_placeholder:
             for answer in st.session_state.jd_history:
                 if answer:
-                    div = f"""<div class="chat-row 
-                                    {'' if answer.origin == 'ai' else 'row-reverse'}">
-                                    <img class="chat-icon" src="static/images{
-                    'chat.png' if answer.origin == 'ai'
-                    else 'user.png'}"
-                                         width=32 height=32>
-                                    <div class="chat-bubble
-                                    {'ai-bubble' if answer.origin == 'ai' else 'human-bubble'}">
-                                        &#8203;{answer.message}
+                    if answer.origin == 'ai':
+                        div = f"""<div class="chat-row">
+                                        <img class="chat-icon" src="static/images/chat.png" width=32 height=32>
+                                        <div class="chat-bubble ai-bubble">
+                                            &#8203;{answer.message}
+                                        </div>
                                     </div>
-                                </div>
-                                        """
-                    st.markdown(div, unsafe_allow_html=True)
+                                    """
+                        st.markdown(div, unsafe_allow_html=True)
+                        st.write(audio_widget)
+
+                    else:
+                        div = f"""<div class="chat-row row-reverse">
+                                        <img class="chat-icon" src="static/images/user.png" width=32 height=32>
+                                        <div class="chat-bubble human-bubble">
+                                            &#8203;{answer.message}
+                                        </div>
+                                    </div>
+                                    """
+                        st.markdown(div, unsafe_allow_html=True)
+
                 for _ in range(3):
                     st.markdown("")
 
         credit_card_placeholder.caption(f"""
         Used {st.session_state.token_count} tokens \n
-        Progress: {int((len(st.session_state.jd_history) / 11 ** 100))}% completed.""")
+        Progress: {int(len(st.session_state.jd_history) / 30 * 100)}% completed.""")
 else:
     st.write("Please enter the job description first.")
