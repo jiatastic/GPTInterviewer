@@ -107,7 +107,8 @@ def initialize_session_state():
             input_variables=["history", "input"],
             template="""I want you to act as an interviewer strictly following the guideline in the current conversation.
                             
-                            Ask me questions and wait for my answers. Do not write explanations.
+                            Ask me questions and wait for my answers.
+                            Do not write explanations.
                             Ask question like a real person, only one question at a time.
                             Do not ask the same question.
                             Do not repeat the question.
