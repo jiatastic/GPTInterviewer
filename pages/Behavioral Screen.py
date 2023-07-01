@@ -178,9 +178,7 @@ def answer_call_back():
                 Message("ai", llm_answer)
             )
             st.session_state.token_count += cb.total_tokens
-        
             return audio_widget
-
         except:
             st.session_state.history.append(Message("ai", "Sorry, I didn't get that. Please try again."))
 
@@ -212,9 +210,10 @@ if bjd:
     else:
         with answer_placeholder:
             answer = audio_recorder(pause_threshold=2.5, sample_rate=44100)
+
             if answer:
                 st.session_state['answer'] = answer
-                audio_widget = answer_call_back()
+                audio = answer_call_back()
             else:
                 st.write("Please speak into the microphone to answer the question.")
 
@@ -230,7 +229,7 @@ if bjd:
                                     </div>
                                     """
                         st.markdown(div, unsafe_allow_html=True)
-                        st.write(audio_widget)
+                        st.write(audio)
 
                     else:
                         div = f"""<div class="chat-row row-reverse">

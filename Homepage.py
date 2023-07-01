@@ -37,7 +37,7 @@ with st.sidebar:
     
     Feel free to contact us if you have any questions or suggestions.
     
-    (Email: zwang531@fordham.edu)
+    (Email: zwang531@fordham.edu
     
                 """)
 
