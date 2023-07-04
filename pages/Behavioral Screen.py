@@ -244,7 +244,8 @@ if bjd:
                     st.markdown("")
 
         credit_card_placeholder.caption(f"""
-        Progress: {int(len(st.session_state.history) / 30 * 100)} % completed \n
+                        Used {st.session_state.token_count} tokens \n
+                        Progress: {int(len(st.session_state.history) / 30 * 100)}% completed.
         """)
 
 else:
