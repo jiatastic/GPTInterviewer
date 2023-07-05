@@ -205,12 +205,10 @@ if bjd:
             evaluation = st.session_state.feedback.run("please give evalution regarding the interview")
             st.markdown(evaluation)
             st.stop()
-
     # keep interview
     else:
         with answer_placeholder:
             answer = audio_recorder(pause_threshold=2.5, sample_rate=44100)
-
             if answer:
                 st.session_state['answer'] = answer
                 audio = answer_call_back()
@@ -221,27 +219,12 @@ if bjd:
             for answer in st.session_state.history:
                 if answer:
                     if answer.origin == 'ai':
-                        div = f"""<div class="chat-row">
-                                        <img class="chat-icon" src="static/images/chat.png" width=32 height=32>
-                                        <div class="chat-bubble ai-bubble">
-                                            &#8203;{answer.message}
-                                        </div>
-                                    </div>
-                                    """
-                        st.markdown(div, unsafe_allow_html=True)
-                        st.write(audio)
-
+                        with st.chat_message("assistant"):
+                            st.write(answer.message)
+                            st.write(audio)
                     else:
-                        div = f"""<div class="chat-row row-reverse">
-                                        <img class="chat-icon" src="static/images/user.png" width=32 height=32>
-                                        <div class="chat-bubble human-bubble">
-                                            &#8203;{answer.message}
-                                        </div>
-                                    </div>
-                                    """
-                        st.markdown(div, unsafe_allow_html=True)
-                for _ in range(3):
-                    st.markdown("")
+                        with st.chat_message("user"):
+                            st.write(answer.message)
 
         credit_card_placeholder.caption(f"""
                         Used {st.session_state.token_count} tokens \n

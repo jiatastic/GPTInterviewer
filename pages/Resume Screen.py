@@ -222,28 +222,12 @@ if position and resume:
             for answer in st.session_state.resume_history:
                 if answer:
                     if answer.origin == 'ai':
-                        div = f"""<div class="chat-row">
-                                        <img class="chat-icon" src="static/images/chat.png" width=32 height=32>
-                                        <div class="chat-bubble ai-bubble">
-                                            &#8203;{answer.message}
-                                        </div>
-                                    </div>
-                                    """
-                        st.markdown(div, unsafe_allow_html=True)
-                        st.write(audio_widget)
-
+                        with st.chat_message("assistant"):
+                            st.write(answer.message)
+                            st.write(audio_widget)
                     else:
-                        div = f"""<div class="chat-row row-reverse">
-                                        <img class="chat-icon" src="static/images/user.png" width=32 height=32>
-                                        <div class="chat-bubble human-bubble">
-                                            &#8203;{answer.message}
-                                        </div>
-                                    </div>
-                                    """
-                        st.markdown(div, unsafe_allow_html=True)
-
-                for _ in range(3):
-                    st.markdown("")
+                        with st.chat_message("user"):
+                            st.write(answer.message)
 
         credit_card_placeholder.caption(f"""
                         Used {st.session_state.token_count} tokens \n
