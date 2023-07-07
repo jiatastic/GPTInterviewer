@@ -23,7 +23,11 @@ import json
 from IPython.display import Audio
 
 ### ——————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————
-#nltk.download('punkt')
+
+try:
+    nltk.data.find('tokenizers/punkt')
+except LookupError:
+    nltk.download('punkt')
 
 def load_lottiefile(filepath: str):
     with open(filepath, "r") as f:

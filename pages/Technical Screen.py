@@ -36,12 +36,6 @@ st.markdown("""
     - Start introduce yourself and enjoy！ """)
 jd = st.text_area("Please enter the job description here (If you don't have one, enter keywords, such as PostgreSQL or Python instead): ")
 
-with st.sidebar:
-    st.markdown("### What's next?")
-    st.write("""
-                For example, if the job description requires knowledge of data mining, GPT Interviewer will ask you questions like "Explains overfitting or How does backpropagation work?" 
-             """)
-
 ### ——————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————
 @dataclass
 class Message:

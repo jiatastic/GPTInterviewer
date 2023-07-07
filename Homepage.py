@@ -17,8 +17,15 @@ with st.sidebar:
 
     st.markdown('### GPTInterviewer - V0.1.1')
     st.markdown("""  
+    #### Let's contact:
+    [Haoxiang Jia](https://www.linkedin.com/in/haoxiang-jia/)
     
-    #### What's Next? 
+    [Zicheng Wang](https://www.linkedin.com/in/todd-wang-5001aa264/)
+    
+    #### Please fill the form, we'd love to have your feedback:
+    [Feedback Form](https://docs.google.com/forms/d/13f4q03bk4lD7sKR7qZ8UM1lQDo6NhRaAKv7uIeXHEaQ/edit)
+    
+    #### What's next? 
     
     v0.1.2: 
     1. A more robust llm-powered evaluation system.
@@ -31,13 +38,6 @@ with st.sidebar:
     [FAISS](https://github.com/facebookresearch/faiss)
     
     [Langchain](https://github.com/hwchase17/langchain)
-    
-    #### Addition
-    We're trying to access GPT-4 for everyone to use.
-    
-    Feel free to contact us if you have any questions or suggestions.
-    
-    (Email: zwang531@fordham.edu)
     
                 """)
 
@@ -81,5 +81,4 @@ with col3:
 
 
 st.markdown("<hr>", unsafe_allow_html=True)
-st.markdown("<p style='text-align: center; color: grey;'> Contact: zwang531@fordham.edu </p>", unsafe_allow_html=True)
 st.markdown("<p style='text-align: center; color: grey;'> Fordham University Center of Digital Transformation DesignLAB </p>", unsafe_allow_html=True)
