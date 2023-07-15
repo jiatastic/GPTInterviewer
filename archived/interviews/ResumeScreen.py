@@ -54,11 +54,9 @@ class Message:
 def save_vector(resume):
 
     pdf_reader = PdfReader(resume)
-
     text = ""
     for page in pdf_reader.pages:
         text += page.extract_text()
-
     # Split the document into chunks
     text_splitter = NLTKTextSplitter()
     texts = text_splitter.split_text(text)
@@ -67,7 +65,6 @@ def save_vector(resume):
 
     embeddings = OpenAIEmbeddings()
     docsearch = FAISS.from_texts(texts, embeddings)
-
     return docsearch
 
 def load_css():

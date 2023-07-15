@@ -23,11 +23,23 @@ from IPython.display import Audio
 nltk.download('punkt')
 
 ### ——————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————
-def load_lottiefile(filepath: str):
-    with open(filepath, "r") as f:
-        return json.load(f)
 
-st_lottie(load_lottiefile("images/hello.json"), speed=1, reverse=False, loop=True, quality="high", height=300)
+home_title = "AI Interviewer"
+home_introduction = "Welcome to AI Interviewer, empowering your interview preparation with generative AI. "
+
+st.markdown(
+    "<style>#MainMenu{visibility:hidden;}</style>",
+    unsafe_allow_html=True
+)
+
+#st.title(home_title)
+st.markdown(f"""# {home_title} <span style=color:#2E9BF5><font size=5>Beta</font></span>""",unsafe_allow_html=True)
+
+st.markdown("""\n""")
+st.markdown("#### Greetings")
+st.write(home_introduction)
+
+
 st.markdown("### Instruction: ")
 st.markdown("""
     In this session, the GPT Interviewer will assess your technical skills as they relate to the job description.
@@ -60,13 +72,12 @@ def load_css():
 
     """ Load CSS """
 
-    with open("static/styles.css", "r") as f:
+    with open("../static/styles.css", "r") as f:
         css = f"<style>{f.read()}</style>"
         st.markdown(css, unsafe_allow_html=True)
 
 def initialize_session_state():
-
-    """ initialize session states """
+    """ initialize session states ccccc"""
 
     if 'jd_docsearch' not in st.session_state:
         st.session_state.jd_docserch = save_vector(jd)
@@ -138,10 +149,10 @@ def answer_call_back():
         # user input
         human_answer = st.session_state.answer
         # transcribe audio
-        save_wav_file("temp/audio.wav", human_answer)
+        save_wav_file("../temp/audio.wav", human_answer)
 
         try:
-            input = transcribe("temp/audio.wav")
+            input = transcribe("../temp/audio.wav")
             # save human_answer to history
             st.session_state.jd_history.append(
                 Message("human", input)
