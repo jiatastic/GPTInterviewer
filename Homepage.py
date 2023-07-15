@@ -47,7 +47,7 @@ st.markdown("Select one of the following screens to start your interview!")
 selected = option_menu(
         menu_title= None,
         options=["Professional", "Resume", "Behavioral","Customize!"],
-        icons = ["cloud-upload", "cast", "cast"],
+        icons = ["cast", "cloud-upload", "cast"],
         default_index=0,
         orientation="horizontal",
     )
@@ -77,8 +77,10 @@ if selected == 'Behavioral':
     - Press the microphone to start answering.
     - Each Interview will take 10 to 15 mins. 
     - Start introduce yourself and enjoy！ 
-    
-    Coming this week!""")
+    """)
+    if st.button("Start Interview Session!"):
+        switch_page("Session - Behavioral")
+
 if selected == 'Customize!':
     st.info("""
         📚In this session, you can customize your own AI Interviewer and practice with it!
