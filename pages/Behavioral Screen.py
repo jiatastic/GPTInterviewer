@@ -22,23 +22,13 @@ from langchain.vectorstores import FAISS
 import base64
 from IPython.display import Audio
 
-nltk.download("punkt")
 ### ————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————
 def load_lottiefile(filepath: str):
     with open(filepath, "r") as f:
         return json.load(f)
-st_lottie(load_lottiefile("images/hello.json"), speed=1, reverse=False, loop=True, quality="high", height=300)
+st_lottie(load_lottiefile("images/welcome.json"), speed=1, reverse=False, loop=True, quality="high", height=300)
 
-st.markdown("### Instruction: ")
-st.markdown("""
-    In this session, the GPT Interviewer will assess your soft skills as they relate to the job description.
-    - Press the microphone to start answering.
-    - Each Interview will take 10 to 15 mins. 
-    - Start introduce yourself and enjoy！ """)
-st.markdown("""
-    """)
-
-bjd = st.text_area("""Please enter the job description here (If you don't have one, enter keywords, such as "communication" or "teamwork" instead): """)
+jd = st.text_area("""Please enter the job description here (If you don't have one, enter keywords, such as "communication" or "teamwork" instead): """)
 
 ### ————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————
 @dataclass
@@ -72,54 +62,38 @@ def save_vector(text):
     docsearch = FAISS.from_texts(texts, embeddings)
     return docsearch
 
-def load_css():
-    with open("static/styles.css", "r") as f:
-        css = f"<style>{f.read()}</style>"
-        st.markdown(css, unsafe_allow_html=True)
-
 def initialize_session_state():
+    if "bq_docsearch" not in st.session_state:
+        st.session_state.bq_docserch = save_vector(jd)
+    if "bq_retriever" not in st.session_state:
+        st.session_state.bq_retriever = st.session_state.bq_docserch.as_retriever(search_type="similarity")
 
-    if "bjd_docsearch" not in st.session_state:
-        st.session_state.bjd_docserch = save_vector(bjd)
-
-    if "bjd_retriever" not in st.session_state:
-        st.session_state.bjd_retriever = st.session_state.bjd_docserch.as_retriever(search_type="similarity")
-
-    if "bjd_chain_type_kwargs" not in st.session_state:
+    if "bq_chain_type_kwargs" not in st.session_state:
         Behavioral_Prompt = PromptTemplate(input_variables=["context", "question"],
                                           template=templates.behavioral_template)
-        st.session_state.bjd_chain_type_kwargs = {"prompt": Behavioral_Prompt}
-
+        st.session_state.bq_chain_type_kwargs = {"prompt": Behavioral_Prompt}
     # interview history
     if "history" not in st.session_state:
         st.session_state.history = []
-
     # token count
     if "token_count" not in st.session_state:
         st.session_state.token_count = 0
-
     if "memory" not in st.session_state:
         st.session_state.memory = ConversationBufferMemory()
-
     if "guideline" not in st.session_state:
-
         llm = ChatOpenAI(
             model_name="gpt-3.5-turbo",
             temperature=0.8, )
-
         st.session_state.guideline = RetrievalQA.from_chain_type(
             llm=llm,
-            chain_type_kwargs=st.session_state.bjd_chain_type_kwargs, chain_type='stuff',
-            retriever=st.session_state.bjd_retriever, memory=st.session_state.memory).run(
+            chain_type_kwargs=st.session_state.bq_chain_type_kwargs, chain_type='stuff',
+            retriever=st.session_state.bq_retriever, memory=st.session_state.memory).run(
             "Create an interview guideline and prepare total of 8 questions. Make sure the questions tests the soft skills")
-
     # llm chain and memory
     if "conversation" not in st.session_state:
-
         llm = ChatOpenAI(
         model_name = "gpt-3.5-turbo",
         temperature = 0.8,)
-
         PROMPT = PromptTemplate(
             input_variables=["history", "input"],
             template="""I want you to act as an interviewer strictly following the guideline in the current conversation.
@@ -139,16 +113,12 @@ def initialize_session_state():
 
                             Candidate: {input}
                             AI: """)
-
         st.session_state.conversation = ConversationChain(prompt=PROMPT, llm=llm,
                                                        memory=st.session_state.memory)
-
     if "feedback" not in st.session_state:
-
         llm = ChatOpenAI(
         model_name = "gpt-3.5-turbo",
         temperature = 0.5,)
-
         st.session_state.feedback = ConversationChain(
             prompt=PromptTemplate(input_variables = ["history", "input"], template = templates.feedback_template),
             llm=llm,
@@ -185,11 +155,9 @@ def answer_call_back():
 
 ### ————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————
 
-if bjd:
-
+if jd:
     # initialize session states
     initialize_session_state()
-    load_css()
 
     chat_placeholder = st.container()
     answer_placeholder = st.container()
@@ -200,11 +168,10 @@ if bjd:
         submit = st.form_submit_button("Submit")
 
     # if submit email adress, get interview feedback imediately
-    if submit:
-        if submit:
-            evaluation = st.session_state.feedback.run("please give evalution regarding the interview")
-            st.markdown(evaluation)
-            st.stop()
+    if st.button("Get Interview Feedback"):
+        evaluation = st.session_state.feedback.run("please give evalution regarding the interview")
+        st.markdown(evaluation)
+        st.stop()
     # keep interview
     else:
         with answer_placeholder:
@@ -232,7 +199,7 @@ if bjd:
         """)
 
 else:
-    st.write("Please enter the job description first")
+    st.info("Please submit job description to start interview.")
 
 
 

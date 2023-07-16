@@ -33,14 +33,7 @@ def load_lottiefile(filepath: str):
     with open(filepath, "r") as f:
         return json.load(f)
 
-st_lottie(load_lottiefile("images/hello.json"), speed=1, reverse=False, loop=True, quality="high", height=300)
-st.markdown("### Instruction: ")
-st.markdown("""
-    In this session, the GPT Interviewer will review your resume and discuss your past experiences.
-    - Press the microphone to start answering.
-    - Each Interview will take 10 to 15 mins. 
-    - Start introduce yourself and enjoy！ """)
-
+st_lottie(load_lottiefile("images/welcome.json"), speed=1, reverse=False, loop=True, quality="high", height=300)
 position = st.selectbox("#### Select the position you are applying for", ["Data Analyst", "Software Engineer", "Marketing"])
 resume = st.file_uploader("#### Upload your resume", type=["pdf"])
 
@@ -54,9 +47,11 @@ class Message:
 def save_vector(resume):
 
     pdf_reader = PdfReader(resume)
+
     text = ""
     for page in pdf_reader.pages:
         text += page.extract_text()
+
     # Split the document into chunks
     text_splitter = NLTKTextSplitter()
     texts = text_splitter.split_text(text)
@@ -67,52 +62,38 @@ def save_vector(resume):
     docsearch = FAISS.from_texts(texts, embeddings)
     return docsearch
 
-def load_css():
-    with open("static/styles.css", "r") as f:
-        css = f"<style>{f.read()}</style>"
-        st.markdown(css, unsafe_allow_html=True)
-
 def initialize_session_state():
 
     # convert resume to embeddings
     if 'docsearch' not in st.session_state:
         st.session_state.docserch = save_vector(resume)
-
     # retriever for resume screen
     if 'retriever' not in st.session_state:
         st.session_state.retriever = st.session_state.docserch.as_retriever(search_type="similarity")
-
     # prompt for retrieving information
     if 'chain_type_kwargs' not in st.session_state:
         st.session_state.chain_type_kwargs = prompt_sector(position, templates)
-
     # interview history
     if "resume_history" not in st.session_state:
         st.session_state.resume_history = []
-
     # token count
     if "token_count" not in st.session_state:
         st.session_state.token_count = 0
-
     # memory buffer for resume screen
     if "resume_memory" not in st.session_state:
         st.session_state.resume_memory = ConversationBufferMemory(human_prefix = "Candidate: ", ai_prefix = "Interviewer")
-
     # guideline for resume screen
-    if "guideline" not in st.session_state:
-
+    if "resume_guideline" not in st.session_state:
         llm = ChatOpenAI(
         model_name = "gpt-3.5-turbo",
         temperature = 0.5,)
 
-        st.session_state.guideline = RetrievalQA.from_chain_type(
+        st.session_state.resume_guideline = RetrievalQA.from_chain_type(
             llm=llm,
             chain_type_kwargs=st.session_state.chain_type_kwargs, chain_type='stuff',
             retriever=st.session_state.retriever, memory = st.session_state.resume_memory).run("Create an interview guideline and prepare only two questions for each topic. Make sure the questions tests the knowledge")
-
     # llm chain for resume screen
     if "resume_screen" not in st.session_state:
-
         llm = ChatOpenAI(
             model_name="gpt-3.5-turbo",
             temperature=0.7, )
@@ -138,9 +119,7 @@ def initialize_session_state():
             
             Candidate: {input}
             AI: """)
-
         st.session_state.resume_screen =  ConversationChain(prompt=PROMPT, llm = llm, memory = st.session_state.resume_memory)
-
     # llm chain for generating feedback
     if "resume_feedback" not in st.session_state:
 
@@ -194,19 +173,14 @@ if position and resume:
 
     # intialize session state
     initialize_session_state()
-    load_css()
     #st.markdown(st.session_state.guideline)
 
     chat_placeholder = st.container()
     answer_placeholder = st.container()
     credit_card_placeholder = st.empty()
 
-    with st.form(key = "email"):
-        email = st.text_input("Please enter your email address to access interview report (you may enter it anytime during the interview): ")
-        submit = st.form_submit_button("Submit")
-
     # if submit email adress, get interview feedback imediately
-    if submit:
+    if st.button("Get Interview Feedback"):
         evaluation = st.session_state.feedback.run("please give evalution regarding the interview")
         st.markdown(evaluation)
         st.stop()
@@ -229,10 +203,7 @@ if position and resume:
                     else:
                         with st.chat_message("user"):
                             st.write(answer.message)
-
         credit_card_placeholder.caption(f"""
                         Used {st.session_state.token_count} tokens \n
                         Progress: {int(len(st.session_state.resume_history) / 30 * 100)}% completed.""")
 
-else:
-    st.write("Please submit your resume and select desired position first.")

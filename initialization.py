@@ -27,14 +27,13 @@ def resume_reader(resume):
 
 def initialize_session_state(template=None, position=None):
     """ initialize session states """
-    #if 'docsearch' not in st.session_state:
     if 'jd' in st.session_state:
-        st.session_state.docserch = embedding(st.session_state.jd)
+        st.session_state.docsearch = embedding(st.session_state.jd)
     else:
-        st.session_state.docserch = embedding(resume_reader(st.session_state.resume))
+        st.session_state.docsearch = embedding(resume_reader(st.session_state.resume))
 
     #if 'retriever' not in st.session_state:
-    st.session_state.retriever = st.session_state.docserch.as_retriever(search_type="similarity")
+    st.session_state.retriever = st.session_state.docsearch.as_retriever(search_type="similarity")
     #if 'chain_type_kwargs' not in st.session_state:
     if 'jd' in st.session_state:
         Interview_Prompt = PromptTemplate(input_variables=["context", "question"],

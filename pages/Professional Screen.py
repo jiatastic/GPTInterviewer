@@ -20,32 +20,13 @@ from streamlit_lottie import st_lottie
 import json
 import time
 from IPython.display import Audio
-nltk.download('punkt')
 
 ### ——————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————
+def load_lottiefile(filepath: str):
+    with open(filepath, "r") as f:
+        return json.load(f)
+st_lottie(load_lottiefile("images/welcome.json"), speed=1, reverse=False, loop=True, quality="high", height=300)
 
-home_title = "AI Interviewer"
-home_introduction = "Welcome to AI Interviewer, empowering your interview preparation with generative AI. "
-
-st.markdown(
-    "<style>#MainMenu{visibility:hidden;}</style>",
-    unsafe_allow_html=True
-)
-
-#st.title(home_title)
-st.markdown(f"""# {home_title} <span style=color:#2E9BF5><font size=5>Beta</font></span>""",unsafe_allow_html=True)
-
-st.markdown("""\n""")
-st.markdown("#### Greetings")
-st.write(home_introduction)
-
-
-st.markdown("### Instruction: ")
-st.markdown("""
-    In this session, the GPT Interviewer will assess your technical skills as they relate to the job description.
-    - Press the microphone to start answering.
-    - Each Interview will take 10 to 15 mins. 
-    - Start introduce yourself and enjoy！ """)
 jd = st.text_area("Please enter the job description here (If you don't have one, enter keywords, such as PostgreSQL or Python instead): ")
 
 ### ——————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————
@@ -68,17 +49,8 @@ def save_vector(text):
     docsearch = FAISS.from_texts(texts, embeddings)
     return docsearch
 
-def load_css():
-
-    """ Load CSS """
-
-    with open("../static/styles.css", "r") as f:
-        css = f"<style>{f.read()}</style>"
-        st.markdown(css, unsafe_allow_html=True)
-
 def initialize_session_state():
-    """ initialize session states ccccc"""
-
+    """ initialize session states """
     if 'jd_docsearch' not in st.session_state:
         st.session_state.jd_docserch = save_vector(jd)
     if 'jd_retriever' not in st.session_state:
@@ -142,17 +114,14 @@ def initialize_session_state():
         )
 
 def answer_call_back():
-
     """ answer call back function"""
-
     with get_openai_callback() as cb:
         # user input
         human_answer = st.session_state.answer
         # transcribe audio
-        save_wav_file("../temp/audio.wav", human_answer)
-
+        save_wav_file("temp/audio.wav", human_answer)
         try:
-            input = transcribe("../temp/audio.wav")
+            input = transcribe("temp/audio.wav")
             # save human_answer to history
             st.session_state.jd_history.append(
                 Message("human", input)
@@ -161,68 +130,52 @@ def answer_call_back():
             llm_answer = st.session_state.jd_screen.run(input)
             # speech synthesis
             audio_file_path = synthesize_speech(llm_answer)
-
             st.session_state.audio_file_path = audio_file_path
             # 创建自动播放的音频部件
             audio_widget = Audio(audio_file_path, autoplay=True)
-
             # save audio data to history
             st.session_state.jd_history.append(
                 Message("ai", llm_answer)
             )
             st.session_state.token_count += cb.total_tokens
-
             return audio_widget
         except:
             st.session_state.jd_history.append(Message("ai", "Sorry, I didn't get that. Please try again."))
 
-
 ### ——————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————
-
 # sumitted job description
 if jd:
-
     # initialize session states
     initialize_session_state()
-    load_css()
     #st.write(st.session_state.jd_guideline)
-
     chat_placeholder = st.container()
     answer_placeholder = st.container()
     credit_card_placeholder = st.empty()
-
-    with st.form(key = "email"):
-        email = st.text_input("Please enter your email address to access interview report (you may enter it anytime during the interview): ")
-        submit = st.form_submit_button("Submit")
-
     # if submit email adress, get interview feedback imediately
-    if submit:
-        evaluation = st.session_state.feedback.run("please give evalution regarding the interview")
+    if st.button("Get Interview Feedback"):
+        evaluation = st.session_state.jd_feedback.run("please give evalution regarding the interview")
         st.markdown(evaluation)
         st.stop()
-
     else:
         with answer_placeholder:
             answer = audio_recorder(pause_threshold = 2.5, sample_rate = 44100)
             if answer:
                 st.session_state['answer'] = answer
-                audio_widget = answer_call_back()
+                audio = answer_call_back()
             else:
                 st.write("Please speak into the microphone to answer the question.")
-
         with chat_placeholder:
             for answer in st.session_state.jd_history:
                 #if answer:
                 if answer.origin == 'ai':
                     with st.chat_message("assistant"):
                         st.write(answer.message)
-                        st.write(audio_widget)
+                        st.write(audio)
                 else:
                     with st.chat_message("user"):
                         st.write(answer.message)
-
         credit_card_placeholder.caption(f"""
         Used {st.session_state.token_count} tokens \n
         Progress: {int(len(st.session_state.jd_history) / 30 * 100)}% completed.""")
 else:
-    st.write("Please enter the job description first.")
+    st.info("Please submit a job description to start the interview.")
