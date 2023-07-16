@@ -170,7 +170,10 @@ if jd:
                 if answer.origin == 'ai':
                     with st.chat_message("assistant"):
                         st.write(answer.message)
-                        st.write(audio)
+                        try:
+                            st.write(audio)
+                        except:
+                            pass
                 else:
                     with st.chat_message("user"):
                         st.write(answer.message)

@@ -174,11 +174,9 @@ if position and resume:
     # intialize session state
     initialize_session_state()
     #st.markdown(st.session_state.guideline)
-
     chat_placeholder = st.container()
     answer_placeholder = st.container()
     credit_card_placeholder = st.empty()
-
     # if submit email adress, get interview feedback imediately
     if st.button("Get Interview Feedback"):
         evaluation = st.session_state.feedback.run("please give evalution regarding the interview")
@@ -199,7 +197,10 @@ if position and resume:
                     if answer.origin == 'ai':
                         with st.chat_message("assistant"):
                             st.write(answer.message)
-                            st.write(audio_widget)
+                            try:
+                                st.write(audio_widget)
+                            except:
+                                pass
                     else:
                         with st.chat_message("user"):
                             st.write(answer.message)
