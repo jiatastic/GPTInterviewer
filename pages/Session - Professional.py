@@ -58,6 +58,8 @@ def answer_call_back():
         except:
             st.session_state.history.append(Message("ai", "Sorry, I didn't get that. Please try again."))
 
+st.cache_data.clear()
+
 jd = st.text_area("#### Job Description (or keywords)")
 st.session_state.jd = jd
 

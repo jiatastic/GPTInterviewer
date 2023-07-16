@@ -58,11 +58,12 @@ def answer_call_back():
         except:
             st.session_state.history.append(Message("ai", "Sorry, I didn't get that. Please try again."))
 
+st.cache_data.clear()
+if 'jd' in st.session_state:
+    del st.session_state.jd
 position = st.selectbox("#### position", ["Data Analyst", "Software Engineer", "Marketing"])
 resume = st.file_uploader("#### resume", type=["pdf"])
 st.session_state.resume = resume
-if 'jd' in st.session_state:
-    del st.session_state.jd
 
 chat_placeholder = st.container()
 answer_placeholder = st.container()
