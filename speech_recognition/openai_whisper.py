@@ -9,7 +9,6 @@ class Config:
     sample_rate = 44100
 
 def save_wav_file(file_path, wav_bytes):
-
     with wave.open(file_path, 'wb') as wav_file:
         wav_file.setnchannels(Config.channels)
         wav_file.setsampwidth(Config.sample_width)

@@ -61,6 +61,8 @@ def answer_call_back():
 position = st.selectbox("#### position", ["Data Analyst", "Software Engineer", "Marketing"])
 resume = st.file_uploader("#### resume", type=["pdf"])
 st.session_state.resume = resume
+if 'jd' in st.session_state:
+    del st.session_state.jd
 
 chat_placeholder = st.container()
 answer_placeholder = st.container()
