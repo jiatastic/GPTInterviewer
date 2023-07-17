@@ -15,7 +15,6 @@ from typing import Literal
 from aws.synthesize_speech import synthesize_speech
 from streamlit_lottie import st_lottie
 import json
-import nltk
 from langchain.text_splitter import NLTKTextSplitter
 from langchain.embeddings import OpenAIEmbeddings
 from langchain.vectorstores import FAISS
@@ -53,8 +52,7 @@ def autoplay_audio(file_path: str):
     update_audio()
     update_markdown(global_audio_md)
 
-def save_vector(text):
-
+def save_vector(text: str):
     text_splitter = NLTKTextSplitter()
     texts = text_splitter.split_text(text)
     # Create emebeddings
@@ -154,7 +152,6 @@ def answer_call_back():
 
 
 ### ————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————
-
 if jd:
     # initialize session states
     initialize_session_state()
@@ -162,10 +159,6 @@ if jd:
     chat_placeholder = st.container()
     answer_placeholder = st.container()
     credit_card_placeholder = st.empty()
-
-    with st.form(key = "email"):
-        email = st.text_input("Please enter your email address to access inte rview report (you may enter it anytime during the interview): ")
-        submit = st.form_submit_button("Submit")
 
     # if submit email adress, get interview feedback imediately
     if st.button("Get Interview Feedback"):
