@@ -32,16 +32,12 @@ jd = st.text_area("Please enter the job description here (If you don't have one,
 ### ——————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————
 @dataclass
 class Message:
-
     """class for keeping track of interview history."""
-
     origin: Literal["human", "ai"]
     message: str
 
 def save_vector(text):
-
     """embeddings"""
-
     text_splitter = NLTKTextSplitter()
     texts = text_splitter.split_text(text)
      # Create emebeddings
@@ -64,13 +60,16 @@ def initialize_session_state():
     # interview history
     if "jd_history" not in st.session_state:
         st.session_state.jd_history = []
+        st.session_state.jd_history.append(Message("ai",
+                                                   "Hello, Welcome to the interview. I am your interviewer today. I will ask you professional questions regarding the job description you submitted."
+                                                   "Please start by introducting a little bit about yourself."))
     # token count
     if "token_count" not in st.session_state:
         st.session_state.token_count = 0
     if "jd_guideline" not in st.session_state:
         llm = ChatOpenAI(
         model_name = "gpt-3.5-turbo",
-        temperature = 0.6,)
+        temperature = 0.8,)
         st.session_state.jd_guideline = RetrievalQA.from_chain_type(
             llm=llm,
             chain_type_kwargs=st.session_state.jd_chain_type_kwargs, chain_type='stuff',
@@ -82,11 +81,11 @@ def initialize_session_state():
             temperature=0.8, )
         PROMPT = PromptTemplate(
             input_variables=["history", "input"],
-            template="""I want you to act as an interviewer strictly following the guideline in the current conversation.
+            template="""I want you to act as a human interviewer strictly following the guideline in the current conversation.
                             
-                            Ask me questions and wait for my answers like a real person.
+                            Ask me questions and wait for my answers.
                             Do not write explanations.
-                            Ask question like a real person, only one question at a time.
+                            only one question at a time.
                             Do not ask the same question.
                             Do not repeat the question.
                             Do ask follow-up questions if necessary. 
@@ -106,7 +105,7 @@ def initialize_session_state():
     if 'jd_feedback' not in st.session_state:
         llm = ChatOpenAI(
             model_name="gpt-3.5-turbo",
-            temperature=0.5, )
+            temperature=0.8, )
         st.session_state.jd_feedback = ConversationChain(
             prompt=PromptTemplate(input_variables=["history", "input"], template=templates.feedback_template),
             llm=llm,
@@ -118,11 +117,32 @@ def answer_call_back():
     with get_openai_callback() as cb:
         # user input
         human_answer = st.session_state.answer
-        # transcribe audio
-        save_wav_file("temp/audio.wav", human_answer)
-        try:
-            input = transcribe("temp/audio.wav")
-            # save human_answer to history
+        if voice:
+            # transcribe audio
+            save_wav_file("temp/audio.wav", human_answer)
+            try:
+                input = transcribe("temp/audio.wav")
+                # save human_answer to history
+                st.session_state.jd_history.append(
+                    Message("human", input)
+                )
+                # OpenAI answer and save to history
+                llm_answer = st.session_state.jd_screen.run(input)
+                # speech synthesis
+                audio_file_path = synthesize_speech(llm_answer)
+                st.session_state.audio_file_path = audio_file_path
+                # 创建自动播放的音频部件
+                audio_widget = Audio(audio_file_path, autoplay=True)
+                # save audio data to history
+                st.session_state.jd_history.append(
+                    Message("ai", llm_answer)
+                )
+                st.session_state.token_count += cb.total_tokens
+                return audio_widget
+            except:
+                st.session_state.jd_history.append(Message("ai", "Sorry, I didn't get that. Please try again."))
+        else:
+            input = human_answer
             st.session_state.jd_history.append(
                 Message("human", input)
             )
@@ -139,8 +159,6 @@ def answer_call_back():
             )
             st.session_state.token_count += cb.total_tokens
             return audio_widget
-        except:
-            st.session_state.jd_history.append(Message("ai", "Sorry, I didn't get that. Please try again."))
 
 ### ——————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————
 # sumitted job description
@@ -158,25 +176,31 @@ if jd:
         st.stop()
     else:
         with answer_placeholder:
-            answer = audio_recorder(pause_threshold = 2.5, sample_rate = 44100)
+            voice: bool = st.checkbox("I would like to speak with AI Interviewer")
+            if voice:
+                answer = audio_recorder(pause_threshold = 2.5, sample_rate = 44100)
+            else:
+                answer = st.chat_input("Your answer")
             if answer:
                 st.session_state['answer'] = answer
                 audio = answer_call_back()
-            else:
-                st.write("Please speak into the microphone to answer the question.")
+
         with chat_placeholder:
+            auto_play = st.checkbox("Let AI interviewer speak!")
+            if auto_play:
+                try:
+                    st.write(audio)
+                except:
+                    pass
             for answer in st.session_state.jd_history:
                 #if answer:
                 if answer.origin == 'ai':
                     with st.chat_message("assistant"):
                         st.write(answer.message)
-                        try:
-                            st.write(audio)
-                        except:
-                            pass
                 else:
                     with st.chat_message("user"):
                         st.write(answer.message)
+
         credit_card_placeholder.caption(f"""
         Used {st.session_state.token_count} tokens \n
         Progress: {int(len(st.session_state.jd_history) / 30 * 100)}% completed.""")

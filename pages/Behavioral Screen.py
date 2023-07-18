@@ -65,7 +65,6 @@ def initialize_session_state():
         st.session_state.bq_docserch = save_vector(jd)
     if "bq_retriever" not in st.session_state:
         st.session_state.bq_retriever = st.session_state.bq_docserch.as_retriever(search_type="similarity")
-
     if "bq_chain_type_kwargs" not in st.session_state:
         Behavioral_Prompt = PromptTemplate(input_variables=["context", "question"],
                                           template=templates.behavioral_template)
@@ -73,6 +72,8 @@ def initialize_session_state():
     # interview history
     if "history" not in st.session_state:
         st.session_state.history = []
+        st.session_state.history.append(Message("ai", "Hello there! I am your interviewer today. I will access your soft skills through a series of questions. Let's get started! Please start by saying hello or introducing yourself."))
+
     # token count
     if "token_count" not in st.session_state:
         st.session_state.token_count = 0
@@ -95,7 +96,7 @@ def initialize_session_state():
         PROMPT = PromptTemplate(
             input_variables=["history", "input"],
             template="""I want you to act as an interviewer strictly following the guideline in the current conversation.
-                            
+                            Candidate has no idea what the guideline is.
                             Ask me questions and wait for my answers. Do not write explanations.
                             Ask question like a real person, only one question at a time.
                             Do not ask the same question.
@@ -128,18 +129,40 @@ def answer_call_back():
         # user input
         human_answer = st.session_state.answer
         # transcribe audio
-        save_wav_file("temp/audio.wav", human_answer)
-        try:
-            input = transcribe("temp/audio.wav")
-            # save human_answer to history
+        if voice:
+            save_wav_file("temp/audio.wav", human_answer)
+            try:
+                input = transcribe("temp/audio.wav")
+                # save human_answer to history
+                st.session_state.history.append(
+                    Message("human", input)
+                )
+                # OpenAI answer and save to history
+                llm_answer = st.session_state.conversation.run(input)
+                # speech synthesis and speak out
+                audio_file_path = synthesize_speech(llm_answer)
+                # create audio widget with autoplay
+                audio_widget = Audio(audio_file_path, autoplay=True)
+                # save audio data to history
+                st.session_state.history.append(
+                    Message("ai", llm_answer)
+                )
+                st.session_state.token_count += cb.total_tokens
+                return audio_widget
+            except:
+                st.session_state.history.append(Message("ai", "Sorry, I didn't get that. Please try again."))
+        else:
+            input = human_answer
             st.session_state.history.append(
                 Message("human", input)
             )
             # OpenAI answer and save to history
             llm_answer = st.session_state.conversation.run(input)
+            # OpenAI answer and save to history
+            llm_answer = st.session_state.conversation.run(input)
             # speech synthesis and speak out
             audio_file_path = synthesize_speech(llm_answer)
-            # 创建自动播放的音频部件
+            # create audio widget with autoplay
             audio_widget = Audio(audio_file_path, autoplay=True)
             # save audio data to history
             st.session_state.history.append(
@@ -147,9 +170,6 @@ def answer_call_back():
             )
             st.session_state.token_count += cb.total_tokens
             return audio_widget
-        except:
-            st.session_state.history.append(Message("ai", "Sorry, I didn't get that. Please try again."))
-
 
 ### ————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————
 if jd:
@@ -168,23 +188,27 @@ if jd:
     # keep interview
     else:
         with answer_placeholder:
-            answer = audio_recorder(pause_threshold=2.5, sample_rate=44100)
+            voice: bool = st.checkbox("I would like to speak with AI Interviewer!")
+            if voice:
+                answer = audio_recorder(pause_threshold=2.5, sample_rate=44100)
+            else:
+                answer = st.chat_input("Your answer")
             if answer:
                 st.session_state['answer'] = answer
                 audio = answer_call_back()
-            else:
-                st.write("Please speak into the microphone to answer the question.")
 
         with chat_placeholder:
+            auto_play = st.checkbox("Let AI interviewer speak!")
+            if auto_play:
+                try:
+                    st.write(audio)
+                except:
+                    pass
             for answer in st.session_state.history:
                 if answer:
                     if answer.origin == 'ai':
                         with st.chat_message("assistant"):
                             st.write(answer.message)
-                            try:
-                                st.write(audio)
-                            except:
-                                pass
                     else:
                         with st.chat_message("user"):
                             st.write(answer.message)

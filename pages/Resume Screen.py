@@ -1,5 +1,4 @@
 # langchain: https://python.langchain.com/
-import time
 from dataclasses import dataclass
 import streamlit as st
 from speech_recognition.openai_whisper import save_wav_file, transcribe
@@ -15,7 +14,6 @@ from aws.synthesize_speech import synthesize_speech
 from langchain.embeddings import OpenAIEmbeddings
 from langchain.vectorstores import FAISS
 from langchain.text_splitter import NLTKTextSplitter
-import nltk
 from PyPDF2 import PdfReader
 from prompts.prompt_selector import prompt_sector
 from streamlit_lottie import st_lottie
@@ -23,19 +21,13 @@ import json
 from IPython.display import Audio
 
 ### ——————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————
-
-try:
-    nltk.data.find('tokenizers/punkt')
-except LookupError:
-    nltk.download('punkt')
-
 def load_lottiefile(filepath: str):
     with open(filepath, "r") as f:
         return json.load(f)
 
 st_lottie(load_lottiefile("images/welcome.json"), speed=1, reverse=False, loop=True, quality="high", height=300)
-position = st.selectbox("#### Select the position you are applying for", ["Data Analyst", "Software Engineer", "Marketing"])
-resume = st.file_uploader("#### Upload your resume", type=["pdf"])
+position = st.selectbox("Select the position you are applying for", ["Data Analyst", "Software Engineer", "Marketing"])
+resume = st.file_uploader("Upload your resume", type=["pdf"])
 
 ### ——————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————
 @dataclass
@@ -45,25 +37,20 @@ class Message:
     message: str
 
 def save_vector(resume):
-
     pdf_reader = PdfReader(resume)
-
     text = ""
     for page in pdf_reader.pages:
         text += page.extract_text()
-
     # Split the document into chunks
     text_splitter = NLTKTextSplitter()
     texts = text_splitter.split_text(text)
     text_splitter = NLTKTextSplitter()
     texts = text_splitter.split_text(text)
-
     embeddings = OpenAIEmbeddings()
     docsearch = FAISS.from_texts(texts, embeddings)
     return docsearch
 
 def initialize_session_state():
-
     # convert resume to embeddings
     if 'docsearch' not in st.session_state:
         st.session_state.docserch = save_vector(resume)
@@ -76,6 +63,7 @@ def initialize_session_state():
     # interview history
     if "resume_history" not in st.session_state:
         st.session_state.resume_history = []
+        st.session_state.resume_history.append(Message(origin="ai", message="Hello, I am your interivewer today. I will ask you some questions regarding your resume and your experience. Please start by saying hello or introducing yourself."))
     # token count
     if "token_count" not in st.session_state:
         st.session_state.token_count = 0
@@ -122,11 +110,9 @@ def initialize_session_state():
         st.session_state.resume_screen =  ConversationChain(prompt=PROMPT, llm = llm, memory = st.session_state.resume_memory)
     # llm chain for generating feedback
     if "resume_feedback" not in st.session_state:
-
         llm = ChatOpenAI(
             model_name="gpt-3.5-turbo",
             temperature=0.5,)
-
         st.session_state.resume_feedback = ConversationChain(
             prompt=PromptTemplate(input_variables=["history","input"], template=templates.feedback_template),
             llm=llm,
@@ -134,37 +120,54 @@ def initialize_session_state():
         )
 
 def answer_call_back():
-
     with get_openai_callback() as cb:
         # user input
         human_answer = st.session_state.answer
-        # transcribe audio
-        save_wav_file("temp/audio.wav", human_answer)
-        try:
-            input = transcribe("temp/audio.wav")
-            # save human input to history
+        if voice:
+            # transcribe audio
+            save_wav_file("temp/audio.wav", human_answer)
+            try:
+                input = transcribe("temp/audio.wav")
+                # save human input to history
+                st.session_state.resume_history.append(
+                    Message("human", input)
+                )
+                # GPT Interviewer output and save to history
+                llm_answer = st.session_state.resume_screen.run(input)
+                # speech synthesis and speak out
+                audio_file_path = synthesize_speech(llm_answer)
+
+                st.session_state.audio_file_path = audio_file_path
+                # create audio widget with autoplay
+                audio_widget = Audio(audio_file_path, autoplay=True)
+
+                # save audio data to history
+                st.session_state.resume_history.append(
+                    Message("ai", llm_answer)
+                )
+                st.session_state.token_count += cb.total_tokens
+
+                return audio_widget
+            except:
+                st.session_state.resume_history.append(Message("ai", "Sorry, I didn't get that. Please try again."))
+        else:
+            input = human_answer
             st.session_state.resume_history.append(
                 Message("human", input)
             )
-
             # GPT Interviewer output and save to history
             llm_answer = st.session_state.resume_screen.run(input)
             # speech synthesis and speak out
             audio_file_path = synthesize_speech(llm_answer)
-
             st.session_state.audio_file_path = audio_file_path
-            # 创建自动播放的音频部件
+            # create audio widget with auto play
             audio_widget = Audio(audio_file_path, autoplay=True)
-
             # save audio data to history
             st.session_state.resume_history.append(
                 Message("ai", llm_answer)
             )
             st.session_state.token_count += cb.total_tokens
-
             return audio_widget
-        except:
-            st.session_state.resume_history.append(Message("ai", "Sorry, I didn't get that. Please try again."))
 
 ### ——————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————
 
@@ -184,26 +187,31 @@ if position and resume:
         st.stop()
     else:
         with answer_placeholder:
-            answer = audio_recorder(pause_threshold=2, sample_rate=44100)
+            voice: bool = st.checkbox("I would like to speak with AI Interviewer!")
+            if voice:
+                answer = audio_recorder(pause_threshold=2, sample_rate=44100)
+            else:
+                answer = st.chat_input("Your answer")
             if answer:
                 st.session_state['answer'] = answer
                 audio_widget = answer_call_back()
-            else:
-                st.write("Please speak into the microphone to answer the question.")
 
         with chat_placeholder:
+            auto_play = st.checkbox("Let AI interviewer speak!")
+            if auto_play:
+                try:
+                    st.write(audio_widget)
+                except:
+                    pass
             for answer in st.session_state.resume_history:
                 if answer:
                     if answer.origin == 'ai':
                         with st.chat_message("assistant"):
                             st.write(answer.message)
-                            try:
-                                st.write(audio_widget)
-                            except:
-                                pass
                     else:
                         with st.chat_message("user"):
                             st.write(answer.message)
+
         credit_card_placeholder.caption(f"""
                         Used {st.session_state.token_count} tokens \n
                         Progress: {int(len(st.session_state.resume_history) / 30 * 100)}% completed.""")
