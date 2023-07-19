@@ -182,7 +182,7 @@ if position and resume:
     credit_card_placeholder = st.empty()
     # if submit email adress, get interview feedback imediately
     if st.button("Get Interview Feedback"):
-        evaluation = st.session_state.feedback.run("please give evalution regarding the interview")
+        evaluation = st.session_state.resume_feedback.run("please give evalution regarding the interview")
         st.markdown(evaluation)
         st.stop()
     else:
