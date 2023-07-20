@@ -26,8 +26,8 @@ def load_lottiefile(filepath: str):
     with open(filepath, "r") as f:
         return json.load(f)
 st_lottie(load_lottiefile("images/welcome.json"), speed=1, reverse=False, loop=True, quality="high", height=300)
-
 jd = st.text_area("""Please enter the job description here (If you don't have one, enter keywords, such as "communication" or "teamwork" instead): """)
+auto_play = st.checkbox("Let AI interviewer speak! (Please don't switch during the interview)")
 
 ### ————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————
 @dataclass
@@ -72,7 +72,7 @@ def initialize_session_state():
     # interview history
     if "history" not in st.session_state:
         st.session_state.history = []
-        st.session_state.history.append(Message("ai", "Hello there! I am your interviewer today. I will access your soft skills through a series of questions. Let's get started! Please start by saying hello or introducing yourself."))
+        st.session_state.history.append(Message("ai", "Hello there! I am your interviewer today. I will access your soft skills through a series of questions. Let's get started! Please start by saying hello or introducing yourself. Note: The maximum length of your answer is 4097 tokens!"))
 
     # token count
     if "token_count" not in st.session_state:
@@ -175,13 +175,16 @@ def answer_call_back():
 if jd:
     # initialize session states
     initialize_session_state()
-
+    credit_card_placeholder = st.empty()
+    feedback = st.button("Get Interview Feedback")
+    guideline = st.button("Show me interview guideline")
+    audio = None
     chat_placeholder = st.container()
     answer_placeholder = st.container()
-    credit_card_placeholder = st.empty()
-
+    if guideline:
+        st.write(st.session_state.guideline)
     # if submit email adress, get interview feedback imediately
-    if st.button("Get Interview Feedback"):
+    if feedback:
         evaluation = st.session_state.feedback.run("please give evalution regarding the interview")
         st.markdown(evaluation)
         st.stop()
@@ -196,25 +199,22 @@ if jd:
             if answer:
                 st.session_state['answer'] = answer
                 audio = answer_call_back()
-
         with chat_placeholder:
-            auto_play = st.checkbox("Let AI interviewer speak!")
-            if auto_play:
-                try:
-                    st.write(audio)
-                except:
-                    pass
             for answer in st.session_state.history:
-                if answer:
-                    if answer.origin == 'ai':
+                if answer.origin == 'ai':
+                    if auto_play and audio:
                         with st.chat_message("assistant"):
                             st.write(answer.message)
+                            st.write(audio)
                     else:
-                        with st.chat_message("user"):
+                        with st.chat_message("assistant"):
                             st.write(answer.message)
+                else:
+                    with st.chat_message("user"):
+                        st.write(answer.message)
 
         credit_card_placeholder.caption(f"""
-                        Used {st.session_state.token_count} tokens \n
+                        Total Used Tokens: {st.session_state.token_count} \n
                         Progress: {int(len(st.session_state.history) / 30 * 100)}% completed.
         """)
 

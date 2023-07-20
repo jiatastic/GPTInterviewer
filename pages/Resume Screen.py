@@ -28,7 +28,7 @@ def load_lottiefile(filepath: str):
 st_lottie(load_lottiefile("images/welcome.json"), speed=1, reverse=False, loop=True, quality="high", height=300)
 position = st.selectbox("Select the position you are applying for", ["Data Analyst", "Software Engineer", "Marketing"])
 resume = st.file_uploader("Upload your resume", type=["pdf"])
-
+auto_play = st.checkbox("Let AI interviewer speak! (Please don't switch during the interview)")
 ### ——————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————
 @dataclass
 class Message:
@@ -63,7 +63,7 @@ def initialize_session_state():
     # interview history
     if "resume_history" not in st.session_state:
         st.session_state.resume_history = []
-        st.session_state.resume_history.append(Message(origin="ai", message="Hello, I am your interivewer today. I will ask you some questions regarding your resume and your experience. Please start by saying hello or introducing yourself."))
+        st.session_state.resume_history.append(Message(origin="ai", message="Hello, I am your interivewer today. I will ask you some questions regarding your resume and your experience. Please start by saying hello or introducing yourself. Note: The maximum length of your answer is 4097 tokens!"))
     # token count
     if "token_count" not in st.session_state:
         st.session_state.token_count = 0
@@ -173,15 +173,19 @@ def answer_call_back():
 
 # sumitted job description
 if position and resume:
-
     # intialize session state
     initialize_session_state()
     #st.markdown(st.session_state.guideline)
+    credit_card_placeholder = st.empty()
+    feedback = st.button("Get Interview Feedback")
+    guideline = st.button("Show me the interview guideline!")
     chat_placeholder = st.container()
     answer_placeholder = st.container()
-    credit_card_placeholder = st.empty()
+    audio = None
     # if submit email adress, get interview feedback imediately
-    if st.button("Get Interview Feedback"):
+    if guideline:
+        st.markdown(st.session_state.resume_guideline)
+    if feedback:
         evaluation = st.session_state.resume_feedback.run("please give evalution regarding the interview")
         st.markdown(evaluation)
         st.stop()
@@ -194,23 +198,21 @@ if position and resume:
                 answer = st.chat_input("Your answer")
             if answer:
                 st.session_state['answer'] = answer
-                audio_widget = answer_call_back()
+                audio = answer_call_back()
 
         with chat_placeholder:
-            auto_play = st.checkbox("Let AI interviewer speak!")
-            if auto_play:
-                try:
-                    st.write(audio_widget)
-                except:
-                    pass
             for answer in st.session_state.resume_history:
-                if answer:
-                    if answer.origin == 'ai':
+                if answer.origin == 'ai':
+                    if auto_play and audio:
                         with st.chat_message("assistant"):
                             st.write(answer.message)
+                            st.write(audio)
                     else:
-                        with st.chat_message("user"):
+                        with st.chat_message("assistant"):
                             st.write(answer.message)
+                else:
+                    with st.chat_message("user"):
+                        st.write(answer.message)
 
         credit_card_placeholder.caption(f"""
                         Used {st.session_state.token_count} tokens \n

@@ -15,6 +15,10 @@ home_introduction = "Welcome to AI Interviewer, empowering your interview prepar
 with st.sidebar:
     st.markdown('AI Interviewer - V0.1.2')
     st.markdown("""  
+    #### What's new?
+    - Chat support
+    - You can view the interview guideline during anytime of the interview
+    
     #### Let's contact:
     [Haoxiang Jia](https://www.linkedin.com/in/haoxiang-jia/)
     
@@ -22,7 +26,6 @@ with st.sidebar:
     #### Please fill the form, we'd love to have your feedback:
     [Feedback Form](https://docs.google.com/forms/d/13f4q03bk4lD7sKR7qZ8UM1lQDo6NhRaAKv7uIeXHEaQ/edit)
 
-    #### What's next?
     #### Powered by
 
     [OpenAI](https://openai.com/)
@@ -59,9 +62,10 @@ selected = option_menu(
 if selected == 'Professional':
     st.info("""
         📚In this session, the AI Interviewer will assess your technical skills as they relate to the job description.
-        - Press the microphone to start answering.
+        Note: The maximum length of your answer is 4097 tokens!
         - Each Interview will take 10 to 15 mins.
         - To start a new session, just refresh the page.
+        - Choose your favorite interaction style (chat/voice)
         - Start introduce yourself and enjoy！ """)
     if st.button("Start Interview!"):
         switch_page("Professional Screen")
@@ -70,9 +74,10 @@ if selected == 'Professional':
 if selected == 'Resume':
     st.info("""
     📚In this session, the AI Interviewer will review your resume and discuss your past experiences.
-    - Press the microphone to start answering.
+    Note: The maximum length of your answer is 4097 tokens!
     - Each Interview will take 10 to 15 mins.
     - To start a new session, just refresh the page.
+    - Choose your favorite interaction style (chat/voice)
     - Start introduce yourself and enjoy！ """
     )
     if st.button("Start Interview!"):
@@ -82,9 +87,10 @@ if selected == 'Resume':
 if selected == 'Behavioral':
     st.info("""
     📚In this session, the AI Interviewer will assess your soft skills as they relate to the job description.
-    - Press the microphone to start answering.
+    Note: The maximum length of your answer is 4097 tokens!
     - Each Interview will take 10 to 15 mins.
     - To start a new session, just refresh the page.
+    - Choose your favorite interaction style (chat/voice)
     - Start introduce yourself and enjoy！ 
     """)
     if st.button("Start Interview!"):
