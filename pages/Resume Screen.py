@@ -136,17 +136,14 @@ def answer_call_back():
                 llm_answer = st.session_state.resume_screen.run(input)
                 # speech synthesis and speak out
                 audio_file_path = synthesize_speech(llm_answer)
-
                 st.session_state.audio_file_path = audio_file_path
                 # create audio widget with autoplay
                 audio_widget = Audio(audio_file_path, autoplay=True)
-
                 # save audio data to history
                 st.session_state.resume_history.append(
                     Message("ai", llm_answer)
                 )
                 st.session_state.token_count += cb.total_tokens
-
                 return audio_widget
             except:
                 st.session_state.resume_history.append(Message("ai", "Sorry, I didn't get that. Please try again."))

@@ -13,14 +13,11 @@ Session = boto3.Session(
     )
 
 def synthesize_speech(text):
-
     Polly = Session.client("polly")
-
     response = Polly.synthesize_speech(
         Text=text,
         OutputFormat="mp3",
         VoiceId="Joanna")
-
     if "AudioStream" in response:
         # Note: Closing the stream is important because the service throttles on the
         # number of parallel connections. Here we are using contextlib.closing to
@@ -37,12 +34,10 @@ def synthesize_speech(text):
                 # Could not write to file, exit gracefully
                 print(error)
                 sys.exit(-1)
-
     else:
         # The response didn't contain audio data, exit gracefully
         print("Could not stream audio")
         sys.exit(-1)
-
     '''
     # Play the audio using the platform's default player
     if sys.platform == "win32":
@@ -51,5 +46,4 @@ def synthesize_speech(text):
         # The following works on macOS and Linux. (Darwin = mac, xdg-open = linux).
         opener = "open" if sys.platform == "darwin" else "xdg-open"
         subprocess.call([opener, output])'''
-
     return output
