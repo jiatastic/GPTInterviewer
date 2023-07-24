@@ -20,6 +20,7 @@ from langchain.embeddings import OpenAIEmbeddings
 from langchain.vectorstores import FAISS
 import base64
 from IPython.display import Audio
+import nltk
 
 ### ————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————
 def load_lottiefile(filepath: str):
@@ -53,6 +54,7 @@ def autoplay_audio(file_path: str):
     update_markdown(global_audio_md)
 
 def save_vector(text: str):
+    nltk.download('punkt')
     text_splitter = NLTKTextSplitter()
     texts = text_splitter.split_text(text)
     # Create emebeddings

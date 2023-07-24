@@ -38,6 +38,8 @@ class Message:
 
 def save_vector(text):
     """embeddings"""
+
+    nltk.download('punkt')
     text_splitter = NLTKTextSplitter()
     texts = text_splitter.split_text(text)
      # Create emebeddings
