@@ -53,24 +53,23 @@ def autoplay_audio(file_path: str):
     update_audio()
     update_markdown(global_audio_md)
 
-def save_vector(text: str):
+def embeddings(text: str):
     nltk.download('punkt')
     text_splitter = NLTKTextSplitter()
     texts = text_splitter.split_text(text)
     # Create emebeddings
     embeddings = OpenAIEmbeddings()
     docsearch = FAISS.from_texts(texts, embeddings)
-    return docsearch
+    retriever = docsearch.as_retriever(search_tupe='similarity search')
+    return retriever
 
 def initialize_session_state():
-    if "bq_docsearch" not in st.session_state:
-        st.session_state.bq_docserch = save_vector(jd)
-    if "bq_retriever" not in st.session_state:
-        st.session_state.bq_retriever = st.session_state.bq_docserch.as_retriever(search_type="similarity")
-    if "bq_chain_type_kwargs" not in st.session_state:
+    if "retriever" not in st.session_state:
+        st.session_state.retriever = embeddings(jd)
+    if "chain_type_kwargs" not in st.session_state:
         Behavioral_Prompt = PromptTemplate(input_variables=["context", "question"],
                                           template=templates.behavioral_template)
-        st.session_state.bq_chain_type_kwargs = {"prompt": Behavioral_Prompt}
+        st.session_state.chain_type_kwargs = {"prompt": Behavioral_Prompt}
     # interview history
     if "history" not in st.session_state:
         st.session_state.history = []
@@ -87,9 +86,10 @@ def initialize_session_state():
             temperature=0.8, )
         st.session_state.guideline = RetrievalQA.from_chain_type(
             llm=llm,
-            chain_type_kwargs=st.session_state.bq_chain_type_kwargs, chain_type='stuff',
-            retriever=st.session_state.bq_retriever, memory=st.session_state.memory).run(
+            chain_type_kwargs=st.session_state.chain_type_kwargs, chain_type='stuff',
+            retriever=st.session_state.retriever, memory=st.session_state.memory).run(
             "Create an interview guideline and prepare total of 8 questions. Make sure the questions tests the soft skills")
+
     # llm chain and memory
     if "conversation" not in st.session_state:
         llm = ChatOpenAI(
@@ -136,42 +136,26 @@ def answer_call_back():
             try:
                 input = transcribe("temp/audio.wav")
                 # save human_answer to history
-                st.session_state.history.append(
-                    Message("human", input)
-                )
-                # OpenAI answer and save to history
-                llm_answer = st.session_state.conversation.run(input)
-                # speech synthesis and speak out
-                audio_file_path = synthesize_speech(llm_answer)
-                # create audio widget with autoplay
-                audio_widget = Audio(audio_file_path, autoplay=True)
-                # save audio data to history
-                st.session_state.history.append(
-                    Message("ai", llm_answer)
-                )
-                st.session_state.token_count += cb.total_tokens
-                return audio_widget
             except:
                 st.session_state.history.append(Message("ai", "Sorry, I didn't get that. Please try again."))
         else:
             input = human_answer
-            st.session_state.history.append(
-                Message("human", input)
-            )
-            # OpenAI answer and save to history
-            llm_answer = st.session_state.conversation.run(input)
-            # OpenAI answer and save to history
-            llm_answer = st.session_state.conversation.run(input)
-            # speech synthesis and speak out
-            audio_file_path = synthesize_speech(llm_answer)
-            # create audio widget with autoplay
-            audio_widget = Audio(audio_file_path, autoplay=True)
-            # save audio data to history
-            st.session_state.history.append(
-                Message("ai", llm_answer)
-            )
-            st.session_state.token_count += cb.total_tokens
-            return audio_widget
+
+        st.session_state.history.append(
+            Message("human", input)
+        )
+        # OpenAI answer and save to history
+        llm_answer = st.session_state.conversation.run(input)
+        # speech synthesis and speak out
+        audio_file_path = synthesize_speech(llm_answer)
+        # create audio widget with autoplay
+        audio_widget = Audio(audio_file_path, autoplay=True)
+        # save audio data to history
+        st.session_state.history.append(
+            Message("ai", llm_answer)
+        )
+        st.session_state.token_count += cb.total_tokens
+        return audio_widget
 
 ### ————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————
 if jd:
@@ -183,6 +167,7 @@ if jd:
     audio = None
     chat_placeholder = st.container()
     answer_placeholder = st.container()
+
     if guideline:
         st.write(st.session_state.guideline)
     # if submit email adress, get interview feedback imediately
