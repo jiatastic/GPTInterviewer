@@ -1,4 +1,4 @@
 [theme]
-#base = 'dark'
+base = 'dark'
 primaryColor = 'F63366'
 font = 'sans serif'

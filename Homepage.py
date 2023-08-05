@@ -45,8 +45,9 @@ st.markdown(f"""# {home_title} <span style=color:#2E9BF5><font size=5>Beta</font
 
 st.markdown("""\n""")
 #st.markdown("#### Greetings")
-st.markdown("Welcome to AI Interviewer! 👏AI Interviewer is a generative AI powered tool that provides you with realistic interview experience. "
-            "You can upload your resume and enter job descriptions, AI Interviewer will ask you customized questions. In addition, you can configure your own AI Interviewer!")
+st.markdown("Welcome to AI Interviewer! 👏 AI Interviewer is a generative AI-powered tool that provides you with a realistic interview experience. "
+            "You can upload your resume and enter job descriptions, and AI Interviewer will ask you customized questions. Additionally, you can configure your own AI Interviewer!")
+
 st.markdown("#### Get started!")
 st.markdown("Select one of the following screens to start your interview!")
 
