@@ -178,6 +178,7 @@ if position and resume:
             voice: bool = st.checkbox("I would like to speak with AI Interviewer!")
             if voice:
                 answer = audio_recorder(pause_threshold=2, sample_rate=44100)
+                st.info("An UnboundLocalError will occur if you fail to speak. Please try again.")
             else:
                 answer = st.chat_input("Your answer")
             if answer:
