@@ -7,13 +7,13 @@ from PIL import Image
 # ————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————
 
 im = Image.open("icon.png")
-st.set_page_config(page_title = "AI Interviewer", layout = "centered",page_icon=im)
+st.set_page_config(page_title = "IntervYou", layout = "centered",page_icon=im)
 
 home_title = "IntervYou"
 home_introduction = "Welcome to IntervYou, empowering your interview preparation with generative AI."
 
 with st.sidebar:
-    st.markdown('AI Interviewer - V0.1.2')
+    st.markdown('IntervYou - V0.1.2')
     st.markdown("""  
     #### What's new?
     - Chat support
