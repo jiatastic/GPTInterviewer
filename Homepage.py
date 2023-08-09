@@ -9,8 +9,8 @@ from PIL import Image
 im = Image.open("icon.png")
 st.set_page_config(page_title = "AI Interviewer", layout = "centered",page_icon=im)
 
-home_title = "AI Interviewer"
-home_introduction = "Welcome to AI Interviewer, empowering your interview preparation with generative AI."
+home_title = "IntervYou"
+home_introduction = "Welcome to IntervYou, empowering your interview preparation with generative AI."
 
 with st.sidebar:
     st.markdown('AI Interviewer - V0.1.2')
@@ -45,8 +45,8 @@ st.markdown(f"""# {home_title} <span style=color:#2E9BF5><font size=5>Beta</font
 
 st.markdown("""\n""")
 #st.markdown("#### Greetings")
-st.markdown("Welcome to AI Interviewer! 👏 AI Interviewer is a generative AI-powered tool that provides you with a realistic interview experience. "
-            "You can upload your resume and enter job descriptions, and AI Interviewer will ask you customized questions. Additionally, you can configure your own AI Interviewer!")
+st.markdown("Welcome to IntervYou! 👏 IntervYou is your personal interviewer powered by generative AI that conducts mock interviews."
+            "You can upload your resume and enter job descriptions, and AI Interviewer will ask you customized questions. Additionally, you can configure your own Interviewer!")
 
 st.markdown("#### Get started!")
 st.markdown("Select one of the following screens to start your interview!")
