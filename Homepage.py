@@ -113,23 +113,14 @@ with st.expander("What are behavioral screen, professional screen and resume scr
     st.write("""
     The behavioral screen evaluates how the candidate handles workplace situations, while the resume screen assesses their past experience and the professional screen evaluates their qualifications and necessary skills.
     """)
-with st.expander("What is the maximum length of my answer?"):
-    st.write("""
-    The maximum length of your answer is 4097 tokens.
-    """)
 with st.expander("How do I start a new session?"):
     st.write("""
     Just refresh the page! Without refreshing the page, streamlit will keep the previous session.
     """)
-with st.expander("""Why did I encounter initialization errors?"""):
+with st.expander("What new features are coming?"):
     st.write("""
-    First of all, try to refresh the page. If the problem persists, please contact us.
-    """)
-with st.expander("""Why did I encounter errors when I tried to talk to the AI Interviewer?"""):
-    st.write("""
-    Please make sure your microphone is connected and you have given the permission to the browser to access your microphone.
-    An UnboundLocalError may occur if the app failed to record. This is a known bug and we are working on it.""")
-with st.expander("""Why did I encounter errors when I tried to upload my resume?"""):
-    st.write("""
-    Please make sure your resume is in pdf format. More formats will be supported in the future.
+    1. A new feature that allows you to customize your own AI Interviewer.
+    2. Better evaluation.
+    3. Import job description from a link / your favorite job board.
+    4. Recommendation of study resources based on your interview performance.
     """)

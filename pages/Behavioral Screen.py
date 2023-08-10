@@ -27,8 +27,22 @@ def load_lottiefile(filepath: str):
     with open(filepath, "r") as f:
         return json.load(f)
 st_lottie(load_lottiefile("images/welcome.json"), speed=1, reverse=False, loop=True, quality="high", height=300)
+st.markdown("""Errors You May Encounter and Solutions:""")
+with st.expander("""Why did I encounter initialization errors?"""):
+    st.write("""
+    First of all, try to refresh the page. If the problem persists, please contact us.
+    """)
+with st.expander("""Why did I encounter errors when I tried to talk to the AI Interviewer?"""):
+    st.write("""
+    Please make sure your microphone is connected and you have given the permission to the browser to access your microphone.
+    An UnboundLocalError may occur if the app failed to record. This is a known bug and we are working on it.""")
+
+### ——————————————————————————————————————————————————————————————————————————————————————————————————————————————————————
+st.markdown("""\n""")
 jd = st.text_area("""Please enter the job description here (If you don't have one, enter keywords, such as "communication" or "teamwork" instead): """)
 auto_play = st.checkbox("Let AI interviewer speak! (Please don't switch during the interview)")
+
+st.toast("4097 tokens is roughly equivalent to around 800 to 1000 words or 3 minutes of speech. Please keep your answer within this limit.")
 
 ### ————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————
 @dataclass
@@ -162,8 +176,11 @@ if jd:
     # initialize session states
     initialize_session_state()
     credit_card_placeholder = st.empty()
-    feedback = st.button("Get Interview Feedback")
-    guideline = st.button("Show me interview guideline")
+    col1, col2 = st.columns(2)
+    with col1:
+        feedback = st.button("Get Interview Feedback")
+    with col2:
+        guideline = st.button("Show me interview guideline!")
     audio = None
     chat_placeholder = st.container()
     answer_placeholder = st.container()
@@ -181,7 +198,7 @@ if jd:
             voice: bool = st.checkbox("I would like to speak with AI Interviewer!")
             if voice:
                 answer = audio_recorder(pause_threshold=2.5, sample_rate=44100)
-                st.info("An UnboundLocalError will occur if you fail to speak. Please try again.")
+                st.warning("An UnboundLocalError will occur if the microphone fails to record.")
             else:
                 answer = st.chat_input("Your answer")
             if answer:
@@ -202,7 +219,6 @@ if jd:
                         st.write(answer.message)
 
         credit_card_placeholder.caption(f"""
-                        Total Used Tokens: {st.session_state.token_count} \n
                         Progress: {int(len(st.session_state.history) / 30 * 100)}% completed.
         """)
 
