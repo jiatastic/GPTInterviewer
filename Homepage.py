@@ -48,6 +48,7 @@ st.markdown("""\n""")
 st.markdown("Welcome to AI Interviewer! 👏 AI Interviewer is your personal interviewer powered by generative AI that conducts mock interviews."
             "You can upload your resume and enter job descriptions, and AI Interviewer will ask you customized questions. Additionally, you can configure your own Interviewer!")
 
+st.markdown("""\n""")
 st.markdown("#### Get started!")
 st.markdown("Select one of the following screens to start your interview!")
 
@@ -105,3 +106,30 @@ if selected == 'Customize!':
          - Different tones of voice.
          
          Coming at the end of July""")
+# ——————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————
+st.markdown("""\n""")
+st.markdown("""#### FAQ""")
+with st.expander("What are behavioral screen, professional screen and resume screen?"):
+    st.write("""
+    The behavioral screen evaluates how the candidate handles workplace situations, while the resume screen assesses their past experience and the professional screen evaluates their qualifications and necessary skills.
+    """)
+with st.expander("What is the maximum length of my answer?"):
+    st.write("""
+    The maximum length of your answer is 4097 tokens.
+    """)
+with st.expander("How do I start a new session?"):
+    st.write("""
+    Just refresh the page! Without refreshing the page, streamlit will keep the previous session.
+    """)
+with st.expander("""Why did I encounter initialization errors?"""):
+    st.write("""
+    First of all, try to refresh the page. If the problem persists, please contact us.
+    """)
+with st.expander("""Why did I encounter errors when I tried to talk to the AI Interviewer?"""):
+    st.write("""
+    Please make sure your microphone is connected and you have given the permission to the browser to access your microphone.
+    An UnboundLocalError may occur if the app failed to record. This is a known bug and we are working on it.""")
+with st.expander("""Why did I encounter errors when I tried to upload my resume?"""):
+    st.write("""
+    Please make sure your resume is in pdf format. More formats will be supported in the future.
+    """)
