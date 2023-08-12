@@ -178,6 +178,7 @@ if jd:
     if feedback:
         evaluation = st.session_state.jd_feedback.run("please give evalution regarding the interview")
         st.markdown(evaluation)
+        st.download_button(label="Download Interview Feedback", data=evaluation, file_name="interview_feedback.txt")
         st.stop()
     else:
         with answer_placeholder:

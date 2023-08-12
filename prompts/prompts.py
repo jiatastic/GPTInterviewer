@@ -120,12 +120,15 @@ class templates:
                
                 Cons: Tell the candidate what he/she can improves on.
                
-                Score: Give a score to the candidate out of 100.  
+                Score: Give a score to the candidate out of 100.
+                
+                Sample Answers: sample answers to each of the questions in the interview guideline.
                
-               Remember, the human is the candidate and the AI is the interviewer.
+               Remember, the candidate has no idea what the interview guideline is.
+               Sometimes the candidate may not even answer the question.
 
                Current conversation:
                {history}
 
-               Candidate: {input}
+               Interviewer: {input}
                Response: """

@@ -176,7 +176,6 @@ def answer_call_back():
 if position and resume:
     # intialize session state
     initialize_session_state()
-    #st.markdown(st.session_state.guideline)
     credit_card_placeholder = st.empty()
     col1, col2 = st.columns(2)
     with col1:
@@ -192,6 +191,7 @@ if position and resume:
     if feedback:
         evaluation = st.session_state.resume_feedback.run("please give evalution regarding the interview")
         st.markdown(evaluation)
+        st.download_button(label="Download Interview Feedback", data=evaluation, file_name="interview_feedback.txt")
         st.stop()
     else:
         with answer_placeholder:
