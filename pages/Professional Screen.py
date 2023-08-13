@@ -4,7 +4,6 @@ from typing import Literal
 from dataclasses import dataclass
 import json
 import base64
-'''langchain: https://python.langchain.com/'''
 from langchain.memory import ConversationBufferMemory
 from langchain.callbacks import get_openai_callback
 from langchain.chat_models import ChatOpenAI
@@ -14,7 +13,6 @@ from langchain.text_splitter import NLTKTextSplitter
 from langchain.embeddings import OpenAIEmbeddings
 from langchain.vectorstores import FAISS
 import nltk
-'''Prompt Template'''
 from prompts.prompts import templates
 # Audio
 from speech_recognition.openai_whisper import save_wav_file, transcribe
