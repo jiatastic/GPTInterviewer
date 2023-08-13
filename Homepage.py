@@ -47,8 +47,8 @@ st.markdown("Welcome to AI Interviewer! 👏 AI Interviewer is your personal int
 st.markdown("""\n""")
 with st.expander("Updates"):
     st.write("""
-    - Chat support
-    - You can now view interview guideline during the interview""")
+    08/13/2023
+    - Fix the error that occurs when the user input fails to be recorded. """)
 with st.expander("What's coming next?"):
     st.write("""
     - We're aware the current evaluation system is not very satisfying. We're working on a better evaluation system that will be released soon!
