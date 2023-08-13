@@ -1,24 +1,25 @@
-# langchain: https://python.langchain.com/
-from dataclasses import dataclass
 import streamlit as st
-from speech_recognition.openai_whisper import save_wav_file, transcribe
-from st_audiorec.st_custom_components import st_audiorec
-from audio_recorder_streamlit import audio_recorder
+from streamlit_lottie import st_lottie
+from typing import Literal
+from dataclasses import dataclass
+import json
+import base64
+'''langchain: https://python.langchain.com/'''
+from langchain.memory import ConversationBufferMemory
 from langchain.callbacks import get_openai_callback
 from langchain.chat_models import ChatOpenAI
-from langchain.memory import ConversationBufferMemory
-from langchain.chains import RetrievalQA, ConversationChain
-from prompts.prompts import templates
+from langchain.chains import ConversationChain, RetrievalQA
 from langchain.prompts.prompt import PromptTemplate
-from typing import Literal
-from aws.synthesize_speech import synthesize_speech
+from langchain.text_splitter import NLTKTextSplitter
 from langchain.embeddings import OpenAIEmbeddings
 from langchain.vectorstores import FAISS
-from langchain.text_splitter import NLTKTextSplitter
 import nltk
-from streamlit_lottie import st_lottie
-import json
-import time
+'''Prompt Template'''
+from prompts.prompts import templates
+# Audio
+from speech_recognition.openai_whisper import save_wav_file, transcribe
+from audio_recorder_streamlit import audio_recorder
+from aws.synthesize_speech import synthesize_speech
 from IPython.display import Audio
 
 ### ——————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————

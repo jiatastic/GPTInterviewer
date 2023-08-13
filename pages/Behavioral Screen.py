@@ -1,32 +1,37 @@
-# langchain: https://python.langchain.com/
-from langchain.memory import ConversationBufferMemory
-# Audio recording
-from dataclasses import dataclass
-# Streamlit - for web application
 import streamlit as st
-from speech_recognition.openai_whisper import save_wav_file, transcribe
-from audio_recorder_streamlit import audio_recorder
+from streamlit_lottie import st_lottie
+from typing import Literal
+from dataclasses import dataclass
+import json
+import base64
+'''langchain: https://python.langchain.com/'''
+from langchain.memory import ConversationBufferMemory
 from langchain.callbacks import get_openai_callback
 from langchain.chat_models import ChatOpenAI
 from langchain.chains import ConversationChain, RetrievalQA
-from prompts.prompts import templates
 from langchain.prompts.prompt import PromptTemplate
-from typing import Literal
-from aws.synthesize_speech import synthesize_speech
-from streamlit_lottie import st_lottie
-import json
 from langchain.text_splitter import NLTKTextSplitter
 from langchain.embeddings import OpenAIEmbeddings
 from langchain.vectorstores import FAISS
-import base64
-from IPython.display import Audio
 import nltk
+'''Prompt Template'''
+from prompts.prompts import templates
+# Audio
+from speech_recognition.openai_whisper import save_wav_file, transcribe
+from audio_recorder_streamlit import audio_recorder
+from aws.synthesize_speech import synthesize_speech
+from IPython.display import Audio
 
 ### ————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————
 def load_lottiefile(filepath: str):
+
+    '''Load lottie animation file'''
+
     with open(filepath, "r") as f:
         return json.load(f)
+
 st_lottie(load_lottiefile("images/welcome.json"), speed=1, reverse=False, loop=True, quality="high", height=300)
+
 st.markdown("""Errors You May Encounter and Solutions:""")
 with st.expander("""Why did I encounter initialization errors?"""):
     st.write("""
@@ -37,21 +42,21 @@ with st.expander("""Why did I encounter errors when I tried to talk to the AI In
     Please make sure your microphone is connected and you have given the permission to the browser to access your microphone.
     An UnboundLocalError may occur if the app failed to record. This is a known bug and we are working on it.""")
 
-### ——————————————————————————————————————————————————————————————————————————————————————————————————————————————————————
 st.markdown("""\n""")
 jd = st.text_area("""Please enter the job description here (If you don't have one, enter keywords, such as "communication" or "teamwork" instead): """)
 auto_play = st.checkbox("Let AI interviewer speak! (Please don't switch during the interview)")
-
 #st.toast("4097 tokens is roughly equivalent to around 800 to 1000 words or 3 minutes of speech. Please keep your answer within this limit.")
-
-### ————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————
 @dataclass
 class Message:
-    """Class for keeping track of interview history."""
+
+    '''dataclass for keeping track of the messages'''
+
     origin: Literal["human", "ai"]
     message: str
 
 def autoplay_audio(file_path: str):
+
+    '''Play audio automatically'''
     def update_audio():
         global global_audio_md
         with open(file_path, "rb") as f:
@@ -68,6 +73,9 @@ def autoplay_audio(file_path: str):
     update_markdown(global_audio_md)
 
 def embeddings(text: str):
+
+    '''Create embeddings for the job description'''
+
     nltk.download('punkt')
     text_splitter = NLTKTextSplitter()
     texts = text_splitter.split_text(text)
@@ -78,6 +86,9 @@ def embeddings(text: str):
     return retriever
 
 def initialize_session_state():
+
+    '''Initialize session state variables'''
+
     if "retriever" not in st.session_state:
         st.session_state.retriever = embeddings(jd)
     if "chain_type_kwargs" not in st.session_state:
@@ -141,6 +152,9 @@ def initialize_session_state():
         )
 
 def answer_call_back():
+
+    '''callback function for answering user input'''
+
     with get_openai_callback() as cb:
         # user input
         human_answer = st.session_state.answer
@@ -173,7 +187,9 @@ def answer_call_back():
 
 ### ————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————
 if jd:
-    # initialize session states
+
+    '''start the interview'''
+
     initialize_session_state()
     credit_card_placeholder = st.empty()
     col1, col2 = st.columns(2)
@@ -187,13 +203,11 @@ if jd:
 
     if guideline:
         st.write(st.session_state.guideline)
-    # if submit email adress, get interview feedback imediately
     if feedback:
         evaluation = st.session_state.feedback.run("please give evalution regarding the interview")
         st.markdown(evaluation)
         st.download_button(label="Download Interview Feedback", data=evaluation, file_name="interview_feedback.txt")
         st.stop()
-    # keep interview
     else:
         with answer_placeholder:
             voice: bool = st.checkbox("I would like to speak with AI Interviewer!")
