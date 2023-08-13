@@ -30,15 +30,10 @@ def load_lottiefile(filepath: str):
 
 st_lottie(load_lottiefile("images/welcome.json"), speed=1, reverse=False, loop=True, quality="high", height=300)
 
-st.markdown("""Errors You May Encounter and Solutions:""")
-with st.expander("""Why did I encounter initialization errors?"""):
-    st.write("""
-    First of all, try to refresh the page. If the problem persists, please contact us.
-    """)
+st.markdown("""solutions to potential errors:""")
 with st.expander("""Why did I encounter errors when I tried to talk to the AI Interviewer?"""):
     st.write("""
-    Please make sure your microphone is connected and you have given the permission to the browser to access your microphone.
-    An UnboundLocalError may occur if the app failed to record. This is a known bug and we are working on it.""")
+    This is because the app failed to record. Make sure that your microphone is connected and that you have given permission to the browser to access your microphone.""")
 
 st.markdown("""\n""")
 jd = st.text_area("""Please enter the job description here (If you don't have one, enter keywords, such as "communication" or "teamwork" instead): """)
@@ -163,7 +158,8 @@ def answer_call_back():
                 input = transcribe("temp/audio.wav")
                 # save human_answer to history
             except:
-                st.session_state.history.append(Message("ai", "Sorry, I didn't get that. Please try again."))
+                st.session_state.history.append(Message("ai", "Sorry, I didn't get that."))
+                return "Please try again."
         else:
             input = human_answer
 
@@ -185,8 +181,6 @@ def answer_call_back():
 
 ### ————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————
 if jd:
-
-    '''start the interview'''
 
     initialize_session_state()
     credit_card_placeholder = st.empty()
@@ -211,7 +205,7 @@ if jd:
             voice: bool = st.checkbox("I would like to speak with AI Interviewer!")
             if voice:
                 answer = audio_recorder(pause_threshold=2.5, sample_rate=44100)
-                st.warning("An UnboundLocalError will occur if the microphone fails to record.")
+                #st.warning("An UnboundLocalError will occur if the microphone fails to record.")
             else:
                 answer = st.chat_input("Your answer")
             if answer:

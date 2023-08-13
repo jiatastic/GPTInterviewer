@@ -26,15 +26,10 @@ def load_lottiefile(filepath: str):
         return json.load(f)
 st_lottie(load_lottiefile("images/welcome.json"), speed=1, reverse=False, loop=True, quality="high", height=300)
 
-st.markdown("""Errors You May Encounter and Solutions:""")
-with st.expander("""Why did I encounter initialization errors?"""):
-    st.write("""
-    First of all, try to refresh the page. If the problem persists, please contact us.
-    """)
+st.markdown("""solutions to potential errors:""")
 with st.expander("""Why did I encounter errors when I tried to talk to the AI Interviewer?"""):
     st.write("""
-    Please make sure your microphone is connected and you have given the permission to the browser to access your microphone.
-    An UnboundLocalError may occur if the app failed to record. This is a known bug and we are working on it.""")
+    This is because the app failed to record. Make sure that your microphone is connected and that you have given permission to the browser to access your microphone.""")
 
 jd = st.text_area("Please enter the job description here (If you don't have one, enter keywords, such as PostgreSQL or Python instead): ")
 auto_play = st.checkbox("Let AI interviewer speak! (Please don't switch during the interview)")
@@ -58,7 +53,7 @@ def save_vector(text):
     docsearch = FAISS.from_texts(texts, embeddings)
     return docsearch
 
-def initialize_session_state():
+def initialize_session_state_jd():
     """ initialize session states """
     if 'jd_docsearch' not in st.session_state:
         st.session_state.jd_docserch = save_vector(jd)
@@ -136,7 +131,8 @@ def answer_call_back():
                 input = transcribe("temp/audio.wav")
                 # save human_answer to history
             except:
-                st.session_state.jd_history.append(Message("ai", "Sorry, I didn't get that. Please try again."))
+                st.session_state.jd_history.append(Message("ai", "Sorry, I didn't get that."))
+                return "Please try again."
         else:
             input = human_answer
 
@@ -160,7 +156,7 @@ def answer_call_back():
 # sumitted job description
 if jd:
     # initialize session states
-    initialize_session_state()
+    initialize_session_state_jd()
     #st.write(st.session_state.jd_guideline)
     credit_card_placeholder = st.empty()
     col1, col2 = st.columns(2)
@@ -184,7 +180,7 @@ if jd:
             voice: bool = st.checkbox("I would like to speak with AI Interviewer")
             if voice:
                 answer = audio_recorder(pause_threshold = 2.5, sample_rate = 44100)
-                st.warning("An UnboundLocalError will occur if the microphone fails to record.")
+                #st.warning("An UnboundLocalError will occur if the microphone fails to record.")
             else:
                 answer = st.chat_input("Your answer")
             if answer:
