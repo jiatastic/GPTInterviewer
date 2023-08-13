@@ -30,7 +30,7 @@ def load_lottiefile(filepath: str):
 
 st_lottie(load_lottiefile("images/welcome.json"), speed=1, reverse=False, loop=True, quality="high", height=300)
 
-st.markdown("""solutions to potential errors:""")
+#st.markdown("""solutions to potential errors:""")
 with st.expander("""Why did I encounter errors when I tried to talk to the AI Interviewer?"""):
     st.write("""
     This is because the app failed to record. Make sure that your microphone is connected and that you have given permission to the browser to access your microphone.""")
