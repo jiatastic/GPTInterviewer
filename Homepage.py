@@ -65,7 +65,6 @@ selected = option_menu(
     )
 
 if selected == 'Professional':
-    '''Professional Screen'''
     st.info("""
         📚In this session, the AI Interviewer will assess your technical skills as they relate to the job description.
         Note: The maximum length of your answer is 4097 tokens!
@@ -77,7 +76,6 @@ if selected == 'Professional':
         switch_page("Professional Screen")
 
 if selected == 'Resume':
-    '''Resume Screen'''
     st.info("""
     📚In this session, the AI Interviewer will review your resume and discuss your past experiences.
     Note: The maximum length of your answer is 4097 tokens!
@@ -90,7 +88,6 @@ if selected == 'Resume':
         switch_page("Resume Screen")
 
 if selected == 'Behavioral':
-    '''Behavioral Screen'''
     st.info("""
     📚In this session, the AI Interviewer will assess your soft skills as they relate to the job description.
     Note: The maximum length of your answer is 4097 tokens!
