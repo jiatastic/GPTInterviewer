@@ -20,7 +20,6 @@ from audio_recorder_streamlit import audio_recorder
 from aws.synthesize_speech import synthesize_speech
 from IPython.display import Audio
 
-### ————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————
 def load_lottiefile(filepath: str):
 
     '''Load lottie animation file'''
@@ -39,16 +38,14 @@ st.markdown("""\n""")
 jd = st.text_area("""Please enter the job description here (If you don't have one, enter keywords, such as "communication" or "teamwork" instead): """)
 auto_play = st.checkbox("Let AI interviewer speak! (Please don't switch during the interview)")
 #st.toast("4097 tokens is roughly equivalent to around 800 to 1000 words or 3 minutes of speech. Please keep your answer within this limit.")
+
 @dataclass
 class Message:
-
     '''dataclass for keeping track of the messages'''
-
     origin: Literal["human", "ai"]
     message: str
 
 def autoplay_audio(file_path: str):
-
     '''Play audio automatically'''
     def update_audio():
         global global_audio_md
@@ -92,7 +89,6 @@ def initialize_session_state():
     if "history" not in st.session_state:
         st.session_state.history = []
         st.session_state.history.append(Message("ai", "Hello there! I am your interviewer today. I will access your soft skills through a series of questions. Let's get started! Please start by saying hello or introducing yourself. Note: The maximum length of your answer is 4097 tokens!"))
-
     # token count
     if "token_count" not in st.session_state:
         st.session_state.token_count = 0
@@ -107,7 +103,6 @@ def initialize_session_state():
             chain_type_kwargs=st.session_state.chain_type_kwargs, chain_type='stuff',
             retriever=st.session_state.retriever, memory=st.session_state.memory).run(
             "Create an interview guideline and prepare total of 8 questions. Make sure the questions tests the soft skills")
-
     # llm chain and memory
     if "conversation" not in st.session_state:
         llm = ChatOpenAI(

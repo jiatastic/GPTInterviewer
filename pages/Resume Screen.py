@@ -21,7 +21,7 @@ import json
 from IPython.display import Audio
 import nltk
 
-### ——————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————
+
 def load_lottiefile(filepath: str):
     with open(filepath, "r") as f:
         return json.load(f)
@@ -41,7 +41,7 @@ resume = st.file_uploader("Upload your resume", type=["pdf"])
 auto_play = st.checkbox("Let AI interviewer speak! (Please don't switch during the interview)")
 
 #st.toast("4097 tokens is roughly equivalent to around 800 to 1000 words or 3 minutes of speech. Please keep your answer within this limit.")
-### ——————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————
+
 @dataclass
 class Message:
     """Class for keeping track of interview history."""
@@ -135,9 +135,7 @@ def initialize_session_state_resume():
 
 def answer_call_back():
     with get_openai_callback() as cb:
-        # user input
         human_answer = st.session_state.answer
-        # transcribe audio
         if voice:
             save_wav_file("temp/audio.wav", human_answer)
             try:
@@ -148,7 +146,6 @@ def answer_call_back():
                 return "Please try again."
         else:
             input = human_answer
-
         st.session_state.resume_history.append(
             Message("human", input)
         )
@@ -165,9 +162,6 @@ def answer_call_back():
         st.session_state.token_count += cb.total_tokens
         return audio_widget
 
-### ——————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————
-
-# sumitted job description
 if position and resume:
     # intialize session state
     initialize_session_state_resume()

@@ -20,7 +20,7 @@ from audio_recorder_streamlit import audio_recorder
 from aws.synthesize_speech import synthesize_speech
 from IPython.display import Audio
 
-### ——————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————
+
 def load_lottiefile(filepath: str):
     with open(filepath, "r") as f:
         return json.load(f)
@@ -35,7 +35,7 @@ jd = st.text_area("Please enter the job description here (If you don't have one,
 auto_play = st.checkbox("Let AI interviewer speak! (Please don't switch during the interview)")
 
 #st.toast("4097 tokens is roughly equivalent to around 800 to 1000 words or 3 minutes of speech. Please keep your answer within this limit.")
-### ——————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————
+
 @dataclass
 class Message:
     """class for keeping track of interview history."""
@@ -152,8 +152,6 @@ def answer_call_back():
         st.session_state.token_count += cb.total_tokens
         return audio_widget
 
-### ——————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————
-# sumitted job description
 if jd:
     # initialize session states
     initialize_session_state_jd()
