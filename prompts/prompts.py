@@ -82,7 +82,7 @@ class templates:
             Let think step by step.
             
             Based on the job description, 
-            Create a guideline with following topics for an interview to test the tecnical knowledge of the candidate on necessary skills.
+            Create a guideline with following topics for an interview to test the technical knowledge of the candidate on necessary skills.
             
             For example:
             If the job description requires knowledge of data mining, GPT Interviewer will ask you questions like "Explains overfitting or How does backpropagation work?"

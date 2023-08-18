@@ -89,11 +89,10 @@ def initialize_session_state_jd():
             temperature=0.8, )
         PROMPT = PromptTemplate(
             input_variables=["history", "input"],
-            template="""I want you to act as a human interviewer strictly following the guideline in the current conversation.
-                            
-                            Ask me questions and wait for my answers.
-                            Do not write explanations.
-                            only one question at a time.
+            template="""I want you to act as an interviewer strictly following the guideline in the current conversation.
+                            Candidate has no idea what the guideline is.
+                            Ask me questions and wait for my answers. Do not write explanations.
+                            Ask question like a real person, only one question at a time.
                             Do not ask the same question.
                             Do not repeat the question.
                             Do ask follow-up questions if necessary. 
