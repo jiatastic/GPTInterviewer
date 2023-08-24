@@ -58,8 +58,7 @@ def save_vector(resume):
     # Split the document into chunks
     text_splitter = NLTKTextSplitter()
     texts = text_splitter.split_text(text)
-    text_splitter = NLTKTextSplitter()
-    texts = text_splitter.split_text(text)
+
     embeddings = OpenAIEmbeddings()
     docsearch = FAISS.from_texts(texts, embeddings)
     return docsearch
